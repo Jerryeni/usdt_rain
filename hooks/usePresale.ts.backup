@@ -1,0 +1,5 @@
+// This file has been archived as part of the cleanup process
+// The app now uses lib/wallet.tsx and USDTRain-specific hooks instead
+// Original file moved to backup on: 2025-01-XX
+
+// If you need to reference the old presale logic, it's preserved here
