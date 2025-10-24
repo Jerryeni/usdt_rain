@@ -17,7 +17,7 @@ export default function SharePage() {
   const { toast } = useToast();
 
   // Generate referral link
-  const referralLink = userInfo?.userId 
+  const referralLink = userInfo?.userId
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${userInfo.userId.toString()}`
     : '';
 
@@ -121,7 +121,7 @@ export default function SharePage() {
 
   const downloadQRCode = () => {
     if (!qrCodeUrl) return;
-    
+
     const link = document.createElement('a');
     link.href = qrCodeUrl;
     link.download = `usdtrain-referral-${userInfo?.userId}.png`;
