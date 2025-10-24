@@ -30,6 +30,32 @@ export default function Dashboard() {
    const [usdtBalance, setUsdtBalance] = useState<null | number>(null);
    const [loadingBalance, setLoadingBalance] = useState(false);
 
+  // Protected Route: Redirect if profile is not complete (not 100%)
+  useEffect(() => {
+    if (loadingUserInfo || userFlowState === 'loading') return;
+
+    // Check if user has completed all steps
+    if (userFlowState !== 'profile-complete') {
+      // Redirect to appropriate step based on current state
+      switch (userFlowState) {
+        case 'no-wallet':
+          router.push('/wallet');
+          break;
+        case 'not-registered':
+          router.push('/register');
+          break;
+        case 'registered':
+          router.push('/activate');
+          break;
+        case 'activated':
+          router.push('/profile?setup=true');
+          break;
+        default:
+          break;
+      }
+    }
+  }, [userFlowState, loadingUserInfo, router]);
+
   const animateCounter = useCallback((elementId: string, targetValue: number, duration = 2000) => {
     if (!isClient) return;
 
@@ -178,6 +204,40 @@ export default function Dashboard() {
     }
   };
 
+  // Show loading state while checking user status
+  if (loadingUserInfo || userFlowState === 'loading') {
+    return (
+      <div className="relative z-10 min-h-screen">
+        <div className="rain-animation" id="rain-container"></div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center">
+              <i className="fas fa-spinner fa-spin text-2xl text-cyan-400"></i>
+            </div>
+            <p className="text-gray-400">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if user hasn't completed profile
+  if (userFlowState !== 'profile-complete') {
+    return (
+      <div className="relative z-10 min-h-screen">
+        <div className="rain-animation" id="rain-container"></div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center">
+              <i className="fas fa-lock text-2xl text-orange-400"></i>
+            </div>
+            <p className="text-gray-400">Redirecting to setup...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative z-10 min-h-screen">
       {/* Animated USDT Rain Background */}
@@ -285,8 +345,8 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* User Flow Progress - Show for non-activated users */}
-      {isClient && userFlowState !== 'activated' && userFlowState !== 'loading' && (
+      {/* User Flow Progress - Show for non-complete users */}
+      {isClient && userFlowState !== 'profile-complete' && userFlowState !== 'loading' && (
         <UserFlowProgress />
       )}
 
