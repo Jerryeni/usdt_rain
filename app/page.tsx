@@ -364,9 +364,9 @@ export default function Dashboard() {
             >
               {!address ? 'Deposit to Activate' :
                usdtBalance === null ? 'Loading...' :
-               usdtBalance >= 25 ? 'Activated' : 'Deposit $25 USDT to Activate'}
+               userInfo?.isActive && userInfo?.activationTimestamp && Number(userInfo.activationTimestamp) > 0 ? 'Activated' : 'Deposit $25 USDT to Activate'}
             </button>
-            {address && usdtBalance !== null && usdtBalance < 25 && (
+            {address && userInfo && (!userInfo.isActive || !userInfo.activationTimestamp || Number(userInfo.activationTimestamp) === 0) && (
               <Link href="/activate">
                 <button
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl orbitron text-sm transition-colors"

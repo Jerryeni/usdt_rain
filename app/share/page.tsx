@@ -252,7 +252,17 @@ export default function SharePage() {
                   </button>
                 </Link>
               </div>
-            ) : !userInfo?.isActive ? (
+            ) : !userInfo?.userId || Number(userInfo.userId) === 0 ? (
+              <div className="text-center py-6">
+                <i className="fas fa-user-plus text-3xl text-blue-400 mb-3"></i>
+                <p className="text-gray-400 mb-4">Register your account to get your referral link</p>
+                <Link href="/register">
+                  <button className="bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold py-2 px-6 rounded-xl transition-all">
+                    Register Now
+                  </button>
+                </Link>
+              </div>
+            ) : !userInfo?.isActive || !userInfo?.activationTimestamp || Number(userInfo.activationTimestamp) === 0 ? (
               <div className="text-center py-6">
                 <i className="fas fa-rocket text-3xl text-orange-400 mb-3"></i>
                 <p className="text-gray-400 mb-4">Activate your account to get your referral link</p>

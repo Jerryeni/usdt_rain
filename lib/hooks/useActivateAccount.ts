@@ -37,10 +37,19 @@ export function useActivateAccount() {
         }
         const usdt = new Contract(usdtTokenAddress, usdtAbi, signer);
 
-        // 3. Check user USDT balance
+        // 3. Verify USDT contract and check user balance
         const userAddress = await signer.getAddress();
-        const balance = await usdt.balanceOf(userAddress);
-        const decimals = await usdt.decimals();
+        
+        // Verify the USDT contract is valid
+        let balance, decimals;
+        try {
+          console.log('Checking USDT contract at:', usdtTokenAddress);
+          decimals = await usdt.decimals();
+          balance = await usdt.balanceOf(userAddress);
+        } catch (error) {
+          console.error('USDT contract error:', error);
+          throw new Error(`Invalid USDT contract address (${usdtTokenAddress}). Please contact support or check your contract configuration.`);
+        }
         const minRequiredUSD = 25; // Minimum 25 USD worth of USDT
         const minRequiredUSDT = BigInt(minRequiredUSD * (10 ** Number(decimals))); // Convert to USDT units
 
@@ -131,6 +140,12 @@ export function useActivateAccount() {
         } else if (errorMessage.includes('CALL_EXCEPTION')) {
           title = "Activation Requirements Not Met";
           description = "Please ensure you have at least $25 USDT and have approved the contract to spend your USDT.";
+        } else if (errorMessage.includes('could not decode result') || errorMessage.includes('BAD_DATA')) {
+          title = "Invalid USDT Contract";
+          description = "The USDT token contract address is invalid or not responding. Please ensure you're using a valid testnet USDT contract.";
+        } else if (errorMessage.includes('Invalid USDT contract')) {
+          title = "USDT Contract Error";
+          description = errorMessage;
         }
 
         toast({
