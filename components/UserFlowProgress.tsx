@@ -12,8 +12,8 @@ export function UserFlowProgress() {
   const progress = useUserFlowProgress();
   const flowMessage = getUserFlowMessage(state);
 
-  // Don't show for fully activated users
-  if (state === 'activated' || state === 'loading') {
+  // Don't show for users with complete profile
+  if (state === 'profile-complete' || state === 'loading') {
     return null;
   }
 
@@ -35,12 +35,12 @@ export function UserFlowProgress() {
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className={`text-center ${progress >= 33 ? 'text-cyan-400' : 'text-gray-500'}`}>
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className={`text-center ${progress >= 25 ? 'text-cyan-400' : 'text-gray-500'}`}>
             <div className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
-              progress >= 33 ? 'bg-cyan-500/20' : 'bg-gray-800'
+              progress >= 25 ? 'bg-cyan-500/20' : 'bg-gray-800'
             }`}>
-              {progress >= 33 ? (
+              {progress >= 25 ? (
                 <i className="fas fa-check text-sm"></i>
               ) : (
                 <span className="text-xs">1</span>
@@ -48,17 +48,29 @@ export function UserFlowProgress() {
             </div>
             <span className="text-xs">Connect</span>
           </div>
-          <div className={`text-center ${progress >= 66 ? 'text-cyan-400' : 'text-gray-500'}`}>
+          <div className={`text-center ${progress >= 50 ? 'text-cyan-400' : 'text-gray-500'}`}>
             <div className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
-              progress >= 66 ? 'bg-cyan-500/20' : 'bg-gray-800'
+              progress >= 50 ? 'bg-cyan-500/20' : 'bg-gray-800'
             }`}>
-              {progress >= 66 ? (
+              {progress >= 50 ? (
                 <i className="fas fa-check text-sm"></i>
               ) : (
                 <span className="text-xs">2</span>
               )}
             </div>
             <span className="text-xs">Register</span>
+          </div>
+          <div className={`text-center ${progress >= 75 ? 'text-cyan-400' : 'text-gray-500'}`}>
+            <div className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
+              progress >= 75 ? 'bg-cyan-500/20' : 'bg-gray-800'
+            }`}>
+              {progress >= 75 ? (
+                <i className="fas fa-check text-sm"></i>
+              ) : (
+                <span className="text-xs">3</span>
+              )}
+            </div>
+            <span className="text-xs">Activate</span>
           </div>
           <div className={`text-center ${progress >= 100 ? 'text-cyan-400' : 'text-gray-500'}`}>
             <div className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
@@ -67,10 +79,10 @@ export function UserFlowProgress() {
               {progress >= 100 ? (
                 <i className="fas fa-check text-sm"></i>
               ) : (
-                <span className="text-xs">3</span>
+                <span className="text-xs">4</span>
               )}
             </div>
-            <span className="text-xs">Activate</span>
+            <span className="text-xs">Profile</span>
           </div>
         </div>
 
@@ -96,7 +108,7 @@ export function UserFlowProgressCompact() {
   const state = useUserFlowState();
   const progress = useUserFlowProgress();
 
-  if (state === 'activated' || state === 'loading') {
+  if (state === 'profile-complete' || state === 'loading') {
     return null;
   }
 

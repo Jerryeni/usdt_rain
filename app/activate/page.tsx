@@ -94,10 +94,24 @@ export default function ActivatePage() {
 
   // Redirect if user is already activated
   useEffect(() => {
-    if (userInfo && userInfo.isActive) {
-      router.push('/');
+    if (userInfo && userInfo.isActive && userInfo.activationTimestamp && Number(userInfo.activationTimestamp) > 0) {
+      // Check if profile is complete
+      if (!userInfo.userName || !userInfo.contactNumber) {
+        router.push('/profile?setup=true');
+      } else {
+        router.push('/');
+      }
     }
   }, [userInfo, router]);
+
+  // Redirect to profile after successful activation
+  useEffect(() => {
+    if (activateMutation.isSuccess) {
+      setTimeout(() => {
+        router.push('/profile?setup=true');
+      }, 2000);
+    }
+  }, [activateMutation.isSuccess, router]);
 
   // Create animated rain effect
   useEffect(() => {

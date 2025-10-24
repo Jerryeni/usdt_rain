@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useUpdateProfile } from '@/lib/hooks/useUpdateProfile';
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const [contactNumber, setContactNumber] = useState('');
   const [validationError, setValidationError] = useState('');
 
+  const router = useRouter();
   const { address, disconnect } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const updateProfile = useUpdateProfile();
@@ -127,6 +129,15 @@ export default function ProfilePage() {
       setTimeout(() => {
         setTxStatus('confirmed');
         setIsEditing(false);
+        
+        // Check if this is initial setup (from query param)
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get('setup') === 'true') {
+          // Redirect to dashboard after initial profile setup
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
+        }
       }, 2000);
     } catch (error) {
       console.error('Profile update failed:', error);

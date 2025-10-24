@@ -10,7 +10,8 @@ export type UserFlowState =
   | 'no-wallet'           // No wallet connected
   | 'not-registered'      // Wallet connected but not registered
   | 'registered'          // Registered but not activated
-  | 'activated'           // Fully activated user
+  | 'activated'           // Activated but profile not complete
+  | 'profile-complete'    // Profile complete - full access
   | 'loading';            // Loading user state
 
 /**
@@ -39,7 +40,12 @@ export function useUserFlowState(): UserFlowState {
     return 'registered';
   }
 
-  return 'activated';
+  // User is activated, check if profile is complete
+  if (!userInfo.userName || !userInfo.contactNumber) {
+    return 'activated';
+  }
+
+  return 'profile-complete';
 }
 
 /**
@@ -52,8 +58,10 @@ export function getNextStep(state: UserFlowState): string {
     case 'not-registered':
       return '/register';
     case 'registered':
-      return '/'; // Dashboard with activation prompt
+      return '/activate';
     case 'activated':
+      return '/profile?setup=true';
+    case 'profile-complete':
       return '/';
     default:
       return '/';
@@ -160,14 +168,21 @@ export function getUserFlowMessage(state: UserFlowState): {
     case 'registered':
       return {
         title: 'Activate Your Account',
-        message: 'Deposit 25 USDT to activate your account and start earning.',
+        message: 'Deposit 25 USDT to activate your account and continue setup.',
         action: 'Activate Now',
-        actionLink: '/',
+        actionLink: '/activate',
       };
     case 'activated':
       return {
+        title: 'Complete Your Profile',
+        message: 'Add your username and contact number to finish setup.',
+        action: 'Update Profile',
+        actionLink: '/profile?setup=true',
+      };
+    case 'profile-complete':
+      return {
         title: 'Welcome Back!',
-        message: 'Your account is fully activated. Start earning by sharing your referral link.',
+        message: 'Your account is fully set up. Start earning by sharing your referral link.',
         action: 'View Dashboard',
         actionLink: '/',
       };
@@ -191,10 +206,12 @@ export function useUserFlowProgress(): number {
     case 'no-wallet':
       return 0;
     case 'not-registered':
-      return 33;
+      return 25;
     case 'registered':
-      return 66;
+      return 50;
     case 'activated':
+      return 75;
+    case 'profile-complete':
       return 100;
     default:
       return 0;
