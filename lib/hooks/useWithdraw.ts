@@ -174,13 +174,15 @@ export function useWithdraw() {
 export function useWithdrawAll() {
   const withdraw = useWithdraw();
 
-  return useMutation({
-    mutationFn: async () => {
+  return {
+    ...withdraw,
+    mutateAsync: async () => {
       return withdraw.mutateAsync({ type: 'all' });
     },
-    onSuccess: withdraw.onSuccess,
-    onError: withdraw.onError,
-  });
+    mutate: () => {
+      return withdraw.mutate({ type: 'all' });
+    },
+  };
 }
 
 /**
@@ -190,16 +192,21 @@ export function useWithdrawAll() {
 export function useWithdrawLevel() {
   const withdraw = useWithdraw();
 
-  return useMutation({
-    mutationFn: async (level: number) => {
+  return {
+    ...withdraw,
+    mutateAsync: async (level: number) => {
       if (level < 1 || level > 10) {
         throw new Error('Level must be between 1 and 10');
       }
       return withdraw.mutateAsync({ type: 'level', level });
     },
-    onSuccess: withdraw.onSuccess,
-    onError: withdraw.onError,
-  });
+    mutate: (level: number) => {
+      if (level < 1 || level > 10) {
+        throw new Error('Level must be between 1 and 10');
+      }
+      return withdraw.mutate({ type: 'level', level });
+    },
+  };
 }
 
 /**
@@ -209,11 +216,13 @@ export function useWithdrawLevel() {
 export function useClaimNonWorking() {
   const withdraw = useWithdraw();
 
-  return useMutation({
-    mutationFn: async () => {
+  return {
+    ...withdraw,
+    mutateAsync: async () => {
       return withdraw.mutateAsync({ type: 'nonWorking' });
     },
-    onSuccess: withdraw.onSuccess,
-    onError: withdraw.onError,
-  });
+    mutate: () => {
+      return withdraw.mutate({ type: 'nonWorking' });
+    },
+  };
 }

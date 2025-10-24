@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useWallet } from '@/lib/wallet';
@@ -9,7 +9,7 @@ import { useRegisterUser } from '@/lib/hooks/useRegisterUser';
 import { getReadContract } from '@/lib/contracts/USDTRain';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const [isClient, setIsClient] = useState(false);
   const [sponsorId, setSponsorId] = useState('');
   const [sponsorInfo, setSponsorInfo] = useState<any>(null);
@@ -521,5 +521,26 @@ export default function RegisterPage() {
         description={txStatus === 'confirmed' ? 'Registration successful! Redirecting to activation...' : undefined}
       />
     </div>
+  );
+}
+
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="relative z-10 min-h-screen">
+        <div className="rain-animation" id="rain-container"></div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center">
+              <i className="fas fa-spinner fa-spin text-2xl text-cyan-400"></i>
+            </div>
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

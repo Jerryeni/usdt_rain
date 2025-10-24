@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { ADDRESSES } from '../src/lib/contracts/addresses';
+import { ADDRESSES } from '../lib/contracts/addresses';
 
 export async function switchToBNBChain() {
   if (!window.ethereum) throw new Error("No Web3 Provider found");
