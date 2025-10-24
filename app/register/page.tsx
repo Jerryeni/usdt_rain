@@ -240,7 +240,26 @@ function RegisterPageContent() {
       }, 2000);
     } catch (error) {
       console.error('Registration failed:', error);
-      setTxError((error as Error).message);
+      
+      // Parse error for user-friendly message
+      const errorMessage = (error as Error)?.message || String(error);
+      const errorCode = (error as any)?.code;
+      
+      let userFriendlyError = 'Registration failed. Please try again.';
+      
+      if (errorCode === 'ACTION_REJECTED' || errorCode === 4001 || errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
+        userFriendlyError = 'You cancelled the transaction in your wallet.';
+      } else if (errorMessage.includes('insufficient funds')) {
+        userFriendlyError = 'Insufficient BNB balance to pay for gas fees.';
+      } else if (errorMessage.includes('Invalid sponsor')) {
+        userFriendlyError = 'Invalid sponsor ID. Please check and try again.';
+      } else if (errorMessage.includes('Already registered')) {
+        userFriendlyError = 'This wallet is already registered.';
+      } else if (errorMessage.includes('network') || errorMessage.includes('Network')) {
+        userFriendlyError = 'Network error. Please check your connection.';
+      }
+      
+      setTxError(userFriendlyError);
       setTxStatus('failed');
     }
   };

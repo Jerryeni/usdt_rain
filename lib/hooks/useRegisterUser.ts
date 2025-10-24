@@ -61,9 +61,35 @@ export function useRegisterUser() {
     },
     onError: (error: unknown) => {
         console.error('Registration error:', error);
+        
+        // Parse error message
+        const errorMessage = (error as Error)?.message || String(error);
+        const errorCode = (error as any)?.code;
+        
+        let userMessage = 'Registration Failed';
+        let description = 'An error occurred during registration. Please try again.';
+
+        // Handle common errors
+        if (errorCode === 'ACTION_REJECTED' || errorCode === 4001 || errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
+          userMessage = 'Transaction Cancelled';
+          description = 'You cancelled the registration in your wallet.';
+        } else if (errorMessage.includes('insufficient funds')) {
+          userMessage = 'Insufficient Balance';
+          description = 'You don\'t have enough BNB to pay for gas fees.';
+        } else if (errorMessage.includes('Invalid sponsor')) {
+          userMessage = 'Invalid Sponsor';
+          description = 'The sponsor ID you entered is not valid.';
+        } else if (errorMessage.includes('Already registered')) {
+          userMessage = 'Already Registered';
+          description = 'This wallet address is already registered.';
+        } else if (errorMessage.includes('network') || errorMessage.includes('Network')) {
+          userMessage = 'Network Error';
+          description = 'Please check your internet connection and try again.';
+        }
+
         toast({
-            title: "Registration Failed",
-            description: (error as Error)?.message || String(error),
+            title: userMessage,
+            description,
             variant: "destructive",
         });
     },
