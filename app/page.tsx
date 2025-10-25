@@ -613,13 +613,6 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="mt-8 p-4 glass-card rounded-xl">
-            <div className="text-center">
-              <div className="text-sm text-gray-400 mb-1">App Version</div>
-              <div className="text-cyan-400 font-semibold">v2.1.0</div>
-            </div>
-          </div>
-
           {/* Wallet Status in Sidebar */}
           <div className="mt-4 p-4 glass-card rounded-xl">
             <div className="text-center">
