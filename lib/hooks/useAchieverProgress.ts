@@ -4,7 +4,7 @@ import { useWallet } from '../wallet';
 
 export interface AchieverProgressData {
   currentLevel: number;
-  currentDirect: number;
+  currentCount: number; // For level 1: direct referrals, for others: count of users at previous level
   nextLevelRequirement: number;
   progressPercentage: number;
   requirements: number[];
@@ -34,7 +34,7 @@ export function useAchieverProgress(userAddress?: string | null) {
 
         return {
           currentLevel: Number(progress[0]),
-          currentDirect: Number(progress[1]),
+          currentCount: Number(progress[1]), // currentCount from contract
           nextLevelRequirement: Number(progress[2]),
           progressPercentage: Number(progress[3]),
           requirements: requirements.map((r: bigint) => Number(r)),

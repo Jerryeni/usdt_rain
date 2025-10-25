@@ -39,6 +39,8 @@ export function useLeaderboard(limit: number = 50) {
         
         const leaderboard: LeaderboardEntry[] = [];
         
+        console.log(`Fetching leaderboard data for ${userAddresses.length} users`);
+        
         // Fetch additional user info for each top earner
         for (let i = 0; i < userAddresses.length; i++) {
           try {
@@ -47,7 +49,7 @@ export function useLeaderboard(limit: number = 50) {
             if (userAddress && userAddress !== '0x0000000000000000000000000000000000000000') {
               const userInfo = await contract.getUserInfo(userAddress);
               
-              leaderboard.push({
+              const entry = {
                 userId: userIds[i],
                 address: userAddress,
                 userName: userInfo[9] || `User #${userIds[i]}`,
@@ -56,6 +58,15 @@ export function useLeaderboard(limit: number = 50) {
                 directReferrals: Number(userInfo[2]),
                 achieverLevel: Number(userInfo[8]),
                 rank: i + 1, // Rank is based on position in the sorted array
+              };
+              
+              leaderboard.push(entry);
+              console.log(`Leaderboard entry ${i + 1}:`, {
+                rank: entry.rank,
+                userName: entry.userName,
+                totalEarned: entry.totalEarnedUSD,
+                directReferrals: entry.directReferrals,
+                achieverLevel: entry.achieverLevel
               });
             }
           } catch (error) {
@@ -63,6 +74,7 @@ export function useLeaderboard(limit: number = 50) {
           }
         }
         
+        console.log(`Leaderboard loaded with ${leaderboard.length} entries`);
         return leaderboard;
       } catch (error) {
         console.error('Error fetching leaderboard:', error);

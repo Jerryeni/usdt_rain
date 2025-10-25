@@ -409,7 +409,7 @@ export default function Dashboard() {
               }}
             >
               {!address ? 'Deposit to Activate' :
-               usdtBalance === null ? 'Loading...' :
+               loadingUserInfo ? 'Loading...' :
                userInfo?.isActive && userInfo?.activationTimestamp && Number(userInfo.activationTimestamp) > 0 ? 'Activated' : 'Deposit $25 USDT to Activate'}
             </button>
             {address && userInfo && (!userInfo.isActive || !userInfo.activationTimestamp || Number(userInfo.activationTimestamp) === 0) && (

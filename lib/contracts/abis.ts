@@ -1,6 +1,8 @@
 import PRESALE_ABI from "./abi/USDTRain.json";
 export { PRESALE_ABI };
 
+// Re-export the ABI as the main contract ABI
+
 export const ERC20_ABI =
 [
   {
