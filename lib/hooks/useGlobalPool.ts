@@ -45,7 +45,7 @@ export function useGlobalPool(userAddress?: string | null) {
             if (userEligible) {
               // Get eligible users count
               const stats = await contract.getContractStats();
-              const eligibleCount = stats[4]; // _eligibleUsersCount
+              const eligibleCount = BigInt(stats[4]); // _eligibleUsersCount
               
               if (eligibleCount > BigInt(0)) {
                 userShare = balance / eligibleCount;
