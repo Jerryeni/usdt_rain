@@ -159,7 +159,7 @@ export default function SharePage() {
   }
 
   return (
-    <div className="relative z-10 min-h-screen pb-20">
+    <div className="relative z-10 min-h-screen pb-24">
       {/* Animated USDT Rain Background */}
       <div className="rain-animation" id="rain-container"></div>
 
@@ -354,34 +354,6 @@ export default function SharePage() {
                 <i className="fas fa-download mr-2"></i>
                 Download QR Code
               </button>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Earnings Breakdown */}
-      {referralData && referralData.byLevel.length > 0 && (
-        <section className="px-4 mb-6">
-          <div className="slide-in" style={{ animationDelay: '0.4s' }}>
-            <h2 className="text-xl font-bold text-white orbitron mb-4">Earnings Breakdown</h2>
-
-            <div className="space-y-3">
-              {referralData.byLevel.slice(0, 3).map((item) => (
-                <div key={item.level} className="glass-card rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-white font-semibold">Level {item.level}</h3>
-                      <p className="text-gray-400 text-xs">
-                        {item.count} referrals • {item.level === 1 ? '10%' : item.level === 2 ? '8%' : '6%'} commission
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-green-400 font-bold">${item.incomeUSD}</div>
-                      <div className="text-gray-400 text-xs">earned</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>

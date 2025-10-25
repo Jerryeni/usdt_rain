@@ -79,7 +79,7 @@ export default function Referrals() {
   }
 
   return (
-    <div className="relative z-10 min-h-screen">
+    <div className="relative z-10 min-h-screen pb-24">
       {/* Animated USDT Rain Background */}
       <div className="rain-animation" id="rain-container"></div>
 

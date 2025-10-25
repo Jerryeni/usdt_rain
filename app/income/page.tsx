@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useLevelIncome } from '@/lib/hooks/useLevelIncome';
-import { useWithdrawLevel, useWithdrawAll } from '@/lib/hooks/useWithdraw';
+import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
+import { useAchieverProgress } from '@/lib/hooks/useAchieverProgress';
+import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
+import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
@@ -15,8 +18,12 @@ export default function IncomeDetails() {
   const { address } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: levelIncome, isLoading: loadingLevelIncome } = useLevelIncome(address);
+  const { data: globalPool, isLoading: loadingGlobalPool } = useGlobalPool(address);
+  const { data: achieverProgress, isLoading: loadingAchiever } = useAchieverProgress(address);
+  const { data: nonWorkingIncome, isLoading: loadingNonWorking } = useNonWorkingIncome(address);
   const withdrawLevel = useWithdrawLevel();
   const withdrawAll = useWithdrawAll();
+  const claimNonWorking = useClaimNonWorking();
 
   // Transaction modal state
   const [txModalOpen, setTxModalOpen] = useState(false);
@@ -79,10 +86,10 @@ export default function IncomeDetails() {
     try {
       setTxStatus('signing');
       const result = await withdrawAll.mutateAsync();
-      
+
       setTxHash(result.transactionHash);
       setTxStatus('pending');
-      
+
       // Wait a bit then mark as confirmed
       setTimeout(() => {
         setTxStatus('confirmed');
@@ -110,16 +117,61 @@ export default function IncomeDetails() {
     try {
       setTxStatus('signing');
       const result = await withdrawLevel.mutateAsync(level);
-      
+
       setTxHash(result.transactionHash);
       setTxStatus('pending');
-      
+
       setTimeout(() => {
         setTxStatus('confirmed');
       }, 2000);
     } catch (error) {
       console.error(`Claim level ${level} failed:`, error);
       setTxError((error as Error).message);
+      setTxStatus('failed');
+    }
+  };
+
+  const handleClaimNonWorking = async () => {
+    if (!nonWorkingIncome || !nonWorkingIncome.canClaim) {
+      return;
+    }
+
+    setTxModalOpen(true);
+    setTxStatus('estimating');
+    setTxHash(undefined);
+    setTxError(undefined);
+
+    try {
+      setTxStatus('signing');
+      const result = await claimNonWorking.mutateAsync();
+
+      setTxHash(result.transactionHash);
+      setTxStatus('pending');
+
+      setTimeout(() => {
+        setTxStatus('confirmed');
+      }, 2000);
+    } catch (error) {
+      console.error('Claim non-working income failed:', error);
+
+      // Extract user-friendly error message
+      let errorMessage = 'Transaction failed';
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.reason) {
+          errorMessage = err.reason;
+        } else if (err.message) {
+          // Try to extract the revert reason from the message
+          const match = err.message.match(/reason="([^"]+)"/);
+          if (match) {
+            errorMessage = match[1];
+          } else {
+            errorMessage = err.message;
+          }
+        }
+      }
+
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
@@ -133,9 +185,9 @@ export default function IncomeDetails() {
 
   // Helper functions for formatting
   const formatUsd = (value: unknown) =>
-      value !== undefined && value !== null
-        ? `$${(Number(value) / 1e18).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-        : '$0.00';
+    value !== undefined && value !== null
+      ? `$${(Number(value) / 1e18).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : '$0.00';
 
   const getLevelColor = (level: number) => {
     const colors = ['green', 'blue', 'purple', 'orange', 'red', 'teal', 'pink', 'indigo', 'yellow', 'gray'];
@@ -160,7 +212,7 @@ export default function IncomeDetails() {
   }
 
   return (
-    <div className="relative z-10 min-h-screen">
+    <div className="relative z-10 min-h-screen pb-24">
       {/* Animated USDT Rain Background */}
       <div className="rain-animation" id="rain-container"></div>
 
@@ -234,10 +286,9 @@ export default function IncomeDetails() {
                 </div>
               </div>
 
-              <button 
-                className={`w-full claim-button text-black font-bold py-4 px-6 rounded-xl orbitron text-lg ${
-                  !levelIncome || levelIncome.totals.available === BigInt(0) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+              <button
+                className={`w-full claim-button text-cyan-400 font-bold py-4 px-6 rounded-xl orbitron text-lg ${!levelIncome || levelIncome.totals.available === BigInt(0) ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 onClick={handleClaimAll}
                 disabled={!levelIncome || levelIncome.totals.available === BigInt(0) || withdrawAll.isPending}
               >
@@ -261,12 +312,10 @@ export default function IncomeDetails() {
 
           <div className="glass-card rounded-2xl p-4">
             {/* Level Income Table Header */}
-            <div className="grid grid-cols-5 gap-2 mb-4 pb-3 border-b border-gray-700/50">
+            <div className="grid grid-cols-3 gap-2 mb-4 pb-3 border-b border-gray-700/50">
               <div className="text-gray-400 text-xs font-medium">Level</div>
-              <div className="text-gray-400 text-xs font-medium text-center">Share</div>
+              <div className="text-gray-400 text-xs font-medium text-center">Commission</div>
               <div className="text-gray-400 text-xs font-medium text-right">Earned</div>
-              <div className="text-gray-400 text-xs font-medium text-right">Available</div>
-              <div className="text-gray-400 text-xs font-medium text-center">Action</div>
             </div>
 
             {/* Level Rows */}
@@ -275,26 +324,14 @@ export default function IncomeDetails() {
             ) : levelIncome ? (
               <div className="space-y-2">
                 {levelIncome.levels.map((item) => (
-                  <div key={item.level} className="level-row grid grid-cols-5 gap-2 py-3 px-2 rounded-lg">
+                  <div key={item.level} className="level-row grid grid-cols-3 gap-2 py-3 px-2 rounded-lg">
                     <div className="flex items-center">
                       <div className={`w-6 h-6 rounded-full bg-gradient-to-br from-${getLevelColor(item.level)}-500/20 to-${getLevelColor(item.level)}-600/20 flex items-center justify-center mr-2`}>
                         <span className={`text-xs font-bold text-${getLevelColor(item.level)}-400`}>L{item.level}</span>
                       </div>
                     </div>
-                    <div className="text-center text-white text-sm">{item.percentage}%</div>
+                    <div className="text-center text-white text-sm">{item.percentage / 100}%</div>
                     <div className="text-right text-white text-sm font-medium">${item.earnedUSD}</div>
-                    <div className="text-right text-cyan-400 text-sm font-medium">${item.availableUSD}</div>
-                    <div className="text-center">
-                      <button 
-                        className={`mini-claim-btn text-black text-xs font-bold py-1 px-3 rounded-md ${
-                          item.available === BigInt(0) ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        onClick={() => handleClaimLevel(item.level)}
-                        disabled={item.available === BigInt(0) || withdrawLevel.isPending}
-                      >
-                        {withdrawLevel.isPending ? '...' : 'Claim'}
-                      </button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -303,6 +340,282 @@ export default function IncomeDetails() {
                 <i className="fas fa-info-circle text-3xl mb-3"></i>
                 <p>No income data available</p>
                 <p className="text-sm mt-2">Connect your wallet to view your earnings</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Global Pool Section */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center mb-4">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center mr-3">
+              <i className="fas fa-globe text-purple-400 text-sm"></i>
+            </div>
+            <h2 className="text-xl font-bold text-white orbitron">Global Pool</h2>
+          </div>
+
+          <div className="glass-card rounded-2xl p-6">
+            {loadingGlobalPool ? (
+              <div className="animate-pulse">
+                <div className="h-20 bg-gray-700/50 rounded-xl mb-4"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-16 bg-gray-700/50 rounded-xl"></div>
+                  <div className="h-16 bg-gray-700/50 rounded-xl"></div>
+                </div>
+              </div>
+            ) : globalPool ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="text-sm text-gray-400 mb-2">Total Pool Balance</div>
+                  <div className="text-3xl font-bold gradient-text orbitron mb-1">
+                    ${globalPool.balanceUSD}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Distributed among {globalPool.userEligible ? 'eligible' : 'all'} active users
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-400 mb-1">Your Share</div>
+                    <div className="text-xl font-bold text-purple-400 orbitron">
+                      ${globalPool.userShareUSD}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {globalPool.userEligible ? 'Eligible' : 'Not Eligible'}
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-400 mb-1">Pool Rate</div>
+                    <div className="text-xl font-bold text-purple-400 orbitron">
+                      {Number(globalPool.percentage) / 100}%
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Of deposits</div>
+                  </div>
+                </div>
+
+                {!globalPool.userEligible && (
+                  <div className="mt-4 bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
+                    <p className="text-sm text-orange-300 text-center">
+                      <i className="fas fa-info-circle mr-2"></i>
+                      Activate your account to become eligible for global pool rewards
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <i className="fas fa-globe text-3xl mb-3"></i>
+                <p>Global pool data unavailable</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Achiever Rewards Section */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex items-center mb-4">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/20 to-pink-600/20 flex items-center justify-center mr-3">
+              <i className="fas fa-award text-pink-400 text-sm"></i>
+            </div>
+            <h2 className="text-xl font-bold text-white orbitron">Achiever Rewards</h2>
+          </div>
+
+          <div className="glass-card rounded-2xl p-6">
+            {loadingAchiever ? (
+              <div className="animate-pulse">
+                <div className="h-20 bg-gray-700/50 rounded-xl mb-4"></div>
+                <div className="h-32 bg-gray-700/50 rounded-xl"></div>
+              </div>
+            ) : achieverProgress ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="text-sm text-gray-400 mb-2">Current Achiever Level</div>
+                  <div className="text-4xl font-bold gradient-text orbitron mb-2">
+                    Level {achieverProgress.currentLevel}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {achieverProgress.currentDirect} / {achieverProgress.nextLevelRequirement} Direct Referrals
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm text-gray-400 mb-2">
+                    <span>Progress to Next Level</span>
+                    <span>{achieverProgress.progressPercentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-3">
+                    <div
+                      className="h-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500"
+                      style={{ width: `${achieverProgress.progressPercentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Achiever Levels */}
+                <div className="space-y-2">
+                  <div className="text-sm font-semibold text-white mb-3">Achiever Level Requirements</div>
+                  {achieverProgress.requirements.map((req, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center justify-between p-3 rounded-lg ${index < achieverProgress.currentLevel
+                        ? 'bg-green-500/10 border border-green-400/20'
+                        : index === achieverProgress.currentLevel
+                          ? 'bg-pink-500/10 border border-pink-400/20'
+                          : 'bg-gray-500/10 border border-gray-400/20'
+                        }`}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${index < achieverProgress.currentLevel
+                          ? 'bg-green-500/20'
+                          : index === achieverProgress.currentLevel
+                            ? 'bg-pink-500/20'
+                            : 'bg-gray-500/20'
+                          }`}>
+                          {index < achieverProgress.currentLevel ? (
+                            <i className="fas fa-check text-green-400"></i>
+                          ) : (
+                            <span className={`text-sm font-bold ${index === achieverProgress.currentLevel ? 'text-pink-400' : 'text-gray-400'
+                              }`}>
+                              {index + 1}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <div className={`font-semibold ${index < achieverProgress.currentLevel
+                            ? 'text-green-400'
+                            : index === achieverProgress.currentLevel
+                              ? 'text-pink-400'
+                              : 'text-gray-400'
+                            }`}>
+                            Level {index + 1}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {req} direct referrals required
+                          </div>
+                        </div>
+                      </div>
+                      {index < achieverProgress.currentLevel && (
+                        <i className="fas fa-trophy text-yellow-400"></i>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {achieverProgress.currentLevel < achieverProgress.requirements.length && (
+                  <div className="mt-4 bg-blue-500/10 border border-blue-400/20 rounded-xl p-3">
+                    <p className="text-sm text-blue-300 text-center">
+                      <i className="fas fa-info-circle mr-2"></i>
+                      Invite {achieverProgress.nextLevelRequirement - achieverProgress.currentDirect} more direct referrals to reach Level {achieverProgress.currentLevel + 1}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <i className="fas fa-award text-3xl mb-3"></i>
+                <p>Achiever progress unavailable</p>
+                <p className="text-sm mt-2">Connect your wallet to view your progress</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Monthly Rewards Section */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.5s' }}>
+          <div className="flex items-center mb-4">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center mr-3">
+              <i className="fas fa-calendar-check text-green-400 text-sm"></i>
+            </div>
+            <h2 className="text-xl font-bold text-white orbitron">Monthly Rewards</h2>
+          </div>
+
+          <div className="glass-card rounded-2xl p-6">
+            {loadingNonWorking ? (
+              <div className="animate-pulse">
+                <div className="h-20 bg-gray-700/50 rounded-xl mb-4"></div>
+                <div className="h-12 bg-gray-700/50 rounded-xl"></div>
+              </div>
+            ) : nonWorkingIncome ? (
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-400 mb-1">Total Claimed</div>
+                    <div className="text-2xl font-bold text-green-400 orbitron">
+                      ${nonWorkingIncome.totalClaimedUSD}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">All time</div>
+                  </div>
+
+                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-400 mb-1">Last Claim</div>
+                    <div className="text-lg font-bold text-green-400 orbitron">
+                      {Number(nonWorkingIncome.lastClaimTime) > 0
+                        ? new Date(Number(nonWorkingIncome.lastClaimTime) * 1000).toLocaleDateString()
+                        : 'Never'}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Date</div>
+                  </div>
+                </div>
+
+                {nonWorkingIncome.hasDirectReferrals ? (
+                  <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-orange-300 mb-2">
+                      <i className="fas fa-info-circle mr-2"></i>
+                      Not Eligible for Monthly Rewards
+                    </div>
+                    <div className="text-sm text-gray-400 mt-2">
+                      Monthly rewards are only available for users without direct referrals. Since you have an active team, you earn through Level Income and Global Pool instead!
+                    </div>
+                  </div>
+                ) : nonWorkingIncome.canClaim ? (
+                  <button
+                    onClick={handleClaimNonWorking}
+                    disabled={claimNonWorking.isPending}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed orbitron"
+                  >
+                    {claimNonWorking.isPending ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-gift mr-2"></i>
+                        Claim Monthly Reward
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="bg-gray-500/10 border border-gray-400/20 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-400 mb-2">
+                      <i className="fas fa-clock mr-2"></i>
+                      Next Claim Available
+                    </div>
+                    <div className="text-lg font-bold text-white">
+                      {Number(nonWorkingIncome.nextClaimTime) > 0
+                        ? new Date(Number(nonWorkingIncome.nextClaimTime) * 1000).toLocaleDateString()
+                        : 'Activate your account first'}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      Monthly rewards can be claimed every 30 days
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <i className="fas fa-calendar-times text-3xl mb-3"></i>
+                <p>Monthly rewards data unavailable</p>
+                <p className="text-sm mt-2">Connect your wallet and activate your account</p>
               </div>
             )}
           </div>

@@ -1,16 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { ContractVerification } from '@/components/ContractVerification';
-import { UserDiagnostics } from '@/components/UserDiagnostics';
-import { BootstrapOwner } from '@/components/BootstrapOwner';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'general' | 'diagnostics'>('general');
-
   return (
-    <div className="relative z-10 min-h-screen pb-20">
+    <div className="relative z-10 min-h-screen pb-24">
       {/* Animated USDT Rain Background */}
       <div className="rain-animation" id="rain-container"></div>
 
@@ -22,46 +16,15 @@ export default function SettingsPage() {
           </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">Settings</h1>
-            <p className="text-gray-400 text-xs">Configuration & Diagnostics</p>
+            <p className="text-gray-400 text-xs">App Configuration</p>
           </div>
           <div className="w-10 h-10"></div>
         </div>
       </header>
 
-      {/* Tabs */}
-      <section className="px-4 py-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex gap-2 bg-gray-800/50 p-1 rounded-xl">
-            <button
-              onClick={() => setActiveTab('general')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
-                activeTab === 'general'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <i className="fas fa-cog mr-2"></i>
-              General
-            </button>
-            <button
-              onClick={() => setActiveTab('diagnostics')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${
-                activeTab === 'diagnostics'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <i className="fas fa-tools mr-2"></i>
-              Diagnostics
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* General Tab */}
-      {activeTab === 'general' && (
-        <section className="px-4 py-6">
-          <div className="max-w-md mx-auto space-y-4">
+      {/* Settings Content */}
+      <section className="px-4 py-6">
+        <div className="max-w-md mx-auto space-y-4">
             {/* App Info */}
             <div className="glass-card rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4">App Information</h3>
@@ -101,48 +64,8 @@ export default function SettingsPage() {
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* Diagnostics Tab */}
-      {activeTab === 'diagnostics' && (
-        <section className="px-4 py-6">
-          <div className="max-w-md mx-auto space-y-6">
-            {/* Info Banner */}
-            <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
-              <p className="text-sm text-blue-300">
-                <i className="fas fa-info-circle mr-2"></i>
-                <strong>Diagnostic Tools:</strong> Use these tools to verify contract deployment, find existing users, and troubleshoot issues.
-              </p>
-            </div>
-
-            {/* Contract Verification */}
-            <div>
-              <h3 className="text-white font-semibold mb-3 px-2">Contract Verification</h3>
-              <ContractVerification />
-            </div>
-
-            {/* User Diagnostics */}
-            <div>
-              <h3 className="text-white font-semibold mb-3 px-2">User Scanner</h3>
-              <UserDiagnostics />
-            </div>
-
-            {/* Bootstrap Owner (Admin Only) */}
-            <div>
-              <h3 className="text-white font-semibold mb-3 px-2">Contract Initialization</h3>
-              <div className="bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-4 mb-3">
-                <p className="text-sm text-yellow-300">
-                  <i className="fas fa-exclamation-triangle mr-2"></i>
-                  <strong>Admin Only:</strong> This tool is only for contract owners to initialize the system.
-                </p>
-              </div>
-              <BootstrapOwner />
-            </div>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-20 border-t border-gray-800 px-4 py-3">

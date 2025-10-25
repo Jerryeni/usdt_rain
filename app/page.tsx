@@ -239,26 +239,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="relative z-10 min-h-screen">
+    <div className="relative z-10 min-h-screen pb-24">
       {/* Animated USDT Rain Background */}
       <div className="rain-animation" id="rain-container"></div>
 
       {/* Header Section */}
       <header className="px-4 sm:px-6 py-4 flex items-center justify-between">
         <div className="slide-in">
-          <button
-            className="w-10 h-10 rounded-xl glass-card flex items-center justify-center"
-            onClick={toggleSidebar}
-          >
-            {fontAwesomeLoaded ? (
-              <i className="fas fa-bars text-cyan-400"></i>
-            ) : (
-              <div className="w-4 h-4 bg-cyan-400 rounded-sm"></div>
-            )}
-          </button>
-        </div>
-
-        <div className="slide-in" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-cyan-500/20 flex items-center justify-center">
               {fontAwesomeLoaded ? (
@@ -271,50 +258,49 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="slide-in" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <div className="text-xs text-gray-400">Wallet</div>
-              <div className="text-sm text-cyan-400 font-mono">
-                {address ? `${address.slice(0, 6)}...${address.slice(-3)}` : 'Not Connected'}
-              </div>
-            </div>
-            <button
-              onClick={handleWalletConnection}
-              disabled={isConnecting}
-              className={`px-3 py-1 rounded-lg text-xs transition-colors ${
-                address
-                  ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                  : isConnecting
-                    ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
-                    : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
-              }`}
-            >
-              {isConnecting ? (
-                <span className="flex items-center">
-                  {fontAwesomeLoaded ? (
-                    <i className="fas fa-spinner fa-spin mr-1"></i>
-                  ) : (
-                    <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin mr-1"></div>
-                  )}
-                  Connecting...
-                </span>
-              ) : address ? (
-                'Connected'
-              ) : (
-                'Connect'
-              )}
-            </button>
-            <div className="w-10 h-10 rounded-full overflow-hidden">
-              <Image
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg"
-                alt="Avatar"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+        <div className="slide-in flex items-center space-x-3" style={{ animationDelay: '0.1s' }}>
+          <button
+            onClick={handleWalletConnection}
+            disabled={isConnecting}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              address
+                ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                : isConnecting
+                  ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+                  : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
+            }`}
+          >
+            {isConnecting ? (
+              <span className="flex items-center">
+                {fontAwesomeLoaded ? (
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                ) : (
+                  <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                )}
+                Connecting...
+              </span>
+            ) : address ? (
+              <>
+                <i className="fas fa-check-circle mr-2"></i>
+                Connected
+              </>
+            ) : (
+              <>
+                <i className="fas fa-wallet mr-2"></i>
+                Connect
+              </>
+            )}
+          </button>
+          <button
+            className="w-10 h-10 rounded-xl glass-card flex items-center justify-center"
+            onClick={toggleSidebar}
+          >
+            {fontAwesomeLoaded ? (
+              <i className="fas fa-bars text-cyan-400"></i>
+            ) : (
+              <div className="w-4 h-4 bg-cyan-400 rounded-sm"></div>
+            )}
+          </button>
         </div>
       </header>
 
@@ -480,95 +466,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-
-          {/* Network Status */}
-          <div className="mt-4 flex items-center justify-center space-x-2 text-sm">
-            <div className={`w-2 h-2 rounded-full ${address ? 'bg-green-400' : 'bg-gray-400'}`}></div>
-            <span className={address ? 'text-green-400' : 'text-gray-400'}>
-              {address ? 'BSC Testnet Connected' : 'Wallet Not Connected'}
-            </span>
-            {address && (
-              <button
-                onClick={handleManualNetworkSwitch}
-                className="ml-2 px-2 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs hover:bg-cyan-500/30 transition-colors"
-                title="Switch to BSC Testnet"
-              >
-                Switch Network
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Actions - Mobile Optimized */}
-      <section className="px-4 sm:px-6 mb-6">
-        <div className="slide-in" style={{ animationDelay: '0.7s' }}>
-          <h3 className="text-white font-semibold mb-4">Quick Actions</h3>
-          <div className="shortcut-grid">
-            <Link href="/income">
-              <div className="shortcut-item rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
-                  {fontAwesomeLoaded ? (
-                    <i className="fas fa-chart-line text-blue-400"></i>
-                  ) : (
-                    <div className="w-6 h-6 bg-blue-400 rounded-lg"></div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <h4 className="text-white font-medium text-xs sm:text-sm">Income Details</h4>
-                  <p className="text-gray-400 text-xs mt-1">View breakdown</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/referrals">
-              <div className="shortcut-item rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center">
-                  {fontAwesomeLoaded ? (
-                    <i className="fas fa-users text-purple-400"></i>
-                  ) : (
-                    <div className="w-6 h-6 bg-purple-400 rounded-lg"></div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <h4 className="text-white font-medium text-xs sm:text-sm">Referrals</h4>
-                  <p className="text-gray-400 text-xs mt-1">Manage team</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/transactions">
-              <div className="shortcut-item rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
-                  {fontAwesomeLoaded ? (
-                    <i className="fas fa-exchange-alt text-green-400"></i>
-                  ) : (
-                    <div className="w-6 h-6 bg-green-400 rounded-lg"></div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <h4 className="text-white font-medium text-xs sm:text-sm">Transactions</h4>
-                  <p className="text-gray-400 text-xs mt-1">View history</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/share">
-              <div className="shortcut-item rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center">
-                  {fontAwesomeLoaded ? (
-                    <i className="fas fa-share-alt text-cyan-400"></i>
-                  ) : (
-                    <div className="w-6 h-6 bg-cyan-400 rounded-lg"></div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <h4 className="text-white font-medium text-xs sm:text-sm">Share Link</h4>
-                  <p className="text-gray-400 text-xs mt-1">Invite friends</p>
-                </div>
-              </div>
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -681,6 +578,14 @@ export default function Dashboard() {
                 <div className="w-4 h-4 bg-gray-400 rounded"></div>
               )}
               <span>Share & Earn</span>
+            </Link>
+            <Link href="/leaderboard" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
+              {fontAwesomeLoaded ? (
+                <i className="fas fa-trophy w-5"></i>
+              ) : (
+                <div className="w-4 h-4 bg-gray-400 rounded"></div>
+              )}
+              <span>Leaderboard</span>
             </Link>
             <Link href="/transactions" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
