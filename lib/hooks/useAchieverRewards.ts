@@ -16,6 +16,9 @@ export interface AchieverRewardsData {
     requirement: number;
     currentCount: number;
     isAchieved: boolean;
+    isRewarded: boolean;
+    canClaim: boolean;
+    rewardStatus: 'not-eligible' | 'unclaimed' | 'claimed';
     description: string;
   }[];
 }
@@ -62,33 +65,62 @@ export function useAchieverRewards(userAddress?: string | null) {
         const achievedLevels = achieverInfo[1].map((l: bigint) => Number(l));
         const directReferrals = Number(achieverInfo[2]);
         
-        // Build detailed level information
-        const levelDetails = requirementsArray.map((requirement: number, index: number) => {
-          const level = index + 1;
-          const isAchieved = achievedLevels.includes(level);
-          
-          // Determine current count for this level
-          let count = 0;
-          let description = '';
-          
-          if (level === 1) {
-            // Level 1 is based on direct referrals
-            count = directReferrals;
-            description = `Requires ${requirement} direct referrals`;
-          } else {
-            // Level 2+ is based on count of users at previous level
-            count = levelCountsArray[level - 2]; // level 2 uses levelCounts[0] (Level 1 count)
-            description = `Requires ${requirement} users at Level ${level - 1}`;
-          }
-          
-          return {
-            level,
-            requirement,
-            currentCount: count,
-            isAchieved,
-            description,
-          };
-        });
+        // Get user ID for checking reward status
+        const userId = await contract.getUserIdByAddress(userAddress);
+        
+        // Build detailed level information with reward status
+        const levelDetails = await Promise.all(
+          requirementsArray.map(async (requirement: number, index: number) => {
+            const level = index + 1;
+            const isAchieved = achievedLevels.includes(level);
+            
+            // Check if reward has been claimed
+            let isRewarded = false;
+            try {
+              isRewarded = await contract.isAchieverRewarded(userId, BigInt(level));
+            } catch (error) {
+              console.warn(`Error checking reward status for level ${level}:`, error);
+            }
+            
+            // Determine current count for this level
+            let count = 0;
+            let description = '';
+            
+            if (level === 1) {
+              // Level 1 is based on direct referrals
+              count = directReferrals;
+              description = `Requires ${requirement} direct referrals`;
+            } else {
+              // Level 2+ is based on count of users at previous level
+              count = levelCountsArray[level - 2]; // level 2 uses levelCounts[0] (Level 1 count)
+              description = `Requires ${requirement} users at Level ${level - 1}`;
+            }
+            
+            // Determine reward status
+            let rewardStatus: 'not-eligible' | 'unclaimed' | 'claimed';
+            let canClaim = false;
+            
+            if (!isAchieved) {
+              rewardStatus = 'not-eligible';
+            } else if (isRewarded) {
+              rewardStatus = 'claimed';
+            } else {
+              rewardStatus = 'unclaimed';
+              canClaim = true;
+            }
+            
+            return {
+              level,
+              requirement,
+              currentCount: count,
+              isAchieved,
+              isRewarded,
+              canClaim,
+              rewardStatus,
+              description,
+            };
+          })
+        );
 
         return {
           currentLevel,

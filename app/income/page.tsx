@@ -9,6 +9,7 @@ import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
 import { useAchieverRewards } from '@/lib/hooks/useAchieverRewards';
 import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
 import { useCountdown } from '@/lib/hooks/useCountdown';
+import { useClaimAchieverReward } from '@/lib/hooks/useClaimAchieverReward';
 import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
@@ -144,6 +145,7 @@ export default function IncomeDetails() {
   const withdrawLevel = useWithdrawLevel();
   const withdrawAll = useWithdrawAll();
   const claimNonWorking = useClaimNonWorking();
+  const claimAchieverReward = useClaimAchieverReward();
 
   // Transaction modal state
   const [txModalOpen, setTxModalOpen] = useState(false);
@@ -247,6 +249,45 @@ export default function IncomeDetails() {
     } catch (error) {
       console.error(`Claim level ${level} failed:`, error);
       setTxError((error as Error).message);
+      setTxStatus('failed');
+    }
+  };
+
+  const handleClaimAchieverReward = async (userId: bigint, level: number) => {
+    setTxModalOpen(true);
+    setTxStatus('estimating');
+    setTxHash(undefined);
+    setTxError(undefined);
+
+    try {
+      setTxStatus('signing');
+      const result = await claimAchieverReward.mutateAsync({ userId, level });
+
+      setTxHash(result.transactionHash);
+      setTxStatus('pending');
+
+      setTimeout(() => {
+        setTxStatus('confirmed');
+      }, 2000);
+    } catch (error) {
+      console.error('Claim achiever reward failed:', error);
+      
+      let errorMessage = 'Transaction failed';
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.reason) {
+          errorMessage = err.reason;
+        } else if (err.message) {
+          const match = err.message.match(/reason="([^"]+)"/);
+          if (match) {
+            errorMessage = match[1];
+          } else {
+            errorMessage = err.message;
+          }
+        }
+      }
+      
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
@@ -636,12 +677,9 @@ export default function IncomeDetails() {
                               </div>
                             </div>
                           </div>
-                          {levelDetail.isAchieved && (
-                            <i className="fas fa-trophy text-yellow-400"></i>
-                          )}
                         </div>
                         {/* Progress for this level */}
-                        <div className="mt-2">
+                        <div className="mt-2 mb-3">
                           <div className="flex justify-between text-xs text-gray-400 mb-1">
                             <span>Progress</span>
                             <span>{levelDetail.currentCount} / {levelDetail.requirement}</span>
@@ -658,6 +696,42 @@ export default function IncomeDetails() {
                             ></div>
                           </div>
                         </div>
+                        {/* Claim Button */}
+                        {levelDetail.rewardStatus === 'not-eligible' ? (
+                          <button
+                            disabled
+                            className="w-full bg-gray-600 text-gray-400 font-semibold py-2 px-4 rounded-lg cursor-not-allowed opacity-50 text-sm"
+                          >
+                            <i className="fas fa-lock mr-2"></i>
+                            Not Eligible
+                          </button>
+                        ) : levelDetail.rewardStatus === 'claimed' ? (
+                          <button
+                            disabled
+                            className="w-full bg-green-500/20 text-green-400 font-semibold py-2 px-4 rounded-lg cursor-default text-sm border border-green-400/30"
+                          >
+                            <i className="fas fa-check-circle mr-2"></i>
+                            Reward Claimed
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => userInfo && handleClaimAchieverReward(BigInt(userInfo.userId), levelDetail.level)}
+                            disabled={claimAchieverReward.isPending}
+                            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                          >
+                            {claimAchieverReward.isPending ? (
+                              <>
+                                <i className="fas fa-spinner fa-spin mr-2"></i>
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fas fa-gift mr-2"></i>
+                                Claim Level {levelDetail.level} Reward
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     );
                   })}
