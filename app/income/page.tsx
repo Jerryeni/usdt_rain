@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useLevelIncome } from '@/lib/hooks/useLevelIncome';
@@ -136,6 +137,7 @@ function MonthlyRewardsContent({
 
 export default function IncomeDetails() {
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
   const { address } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: levelIncome, isLoading: loadingLevelIncome } = useLevelIncome(address);
@@ -268,6 +270,11 @@ export default function IncomeDetails() {
 
       setTimeout(() => {
         setTxStatus('confirmed');
+        
+        // Redirect to help page after 2 seconds to show success message
+        setTimeout(() => {
+          router.push('/help?from=reward');
+        }, 2000);
       }, 2000);
     } catch (error) {
       console.error('Claim achiever reward failed:', error);
