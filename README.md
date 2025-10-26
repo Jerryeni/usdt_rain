@@ -2,6 +2,20 @@
 
 A decentralized multi-level marketing (MLM) platform built on Binance Smart Chain (BSC) that enables users to earn USDT through referrals and level-based income distribution.
 
+## 📚 Documentation
+
+Complete documentation is available in the [`docs/`](./docs) directory:
+
+- **[Admin Documentation](./docs/admin/)** - Complete admin guides and operations manual
+- **[User Guides](./docs/guides/)** - Guides for platform users
+- **[Technical Docs](./docs/)** - Architecture, deployment, and testing guides
+
+**Quick Links:**
+- [Admin Dashboard Guide](./docs/admin/ADMIN_DASHBOARD.md)
+- [First User Guide](./docs/guides/FIRST_USER_GUIDE.md)
+- [Quick Start](./docs/QUICKSTART.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+
 ## Features
 
 ### Core Functionality

@@ -151,9 +151,15 @@ The `AdminAccessDebug` component is now added to the admin page. It shows:
 
 **To use**:
 1. Navigate to `/admin`
-2. Look at bottom-right corner
-3. Review all the information
-4. Identify which condition is failing
+2. Click the bug icon (🐛) in bottom-right corner
+3. Or press `Ctrl+Shift+D` (or `Cmd+Shift+D` on Mac)
+4. Review all the information
+5. Identify which condition is failing
+6. Click the X or bug icon again to close
+
+**Keyboard Shortcut**:
+- `Ctrl+Shift+D` (Windows/Linux)
+- `Cmd+Shift+D` (Mac)
 
 **To remove** (after debugging):
 1. Open `app/admin/page.tsx`
