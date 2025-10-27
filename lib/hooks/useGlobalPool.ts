@@ -9,6 +9,8 @@ export interface GlobalPoolData {
   userEligible: boolean;
   userShare: bigint;
   userShareUSD: string;
+  totalClaimed: bigint;
+  totalClaimedUSD: string;
 }
 
 /**
@@ -26,30 +28,49 @@ export function useGlobalPool(userAddress?: string | null) {
 
       try {
         const contract = getReadContract(provider);
-        
+
         // Get global pool balance
         const balance = await contract.globalPoolBalance();
-        
+
         // Get global pool percentage
         const percentage = await contract.globalPoolPercentage();
-        
-        // Calculate user eligibility and share if address provided
+
+        // Calculate user eligibility, share, and total claimed
         let userEligible = false;
         let userShare = BigInt(0);
-        
+        let totalClaimed = BigInt(0);
+
         if (userAddress) {
           try {
             const userInfo = await contract.getUserInfo(userAddress);
+            const userId = userInfo[0]; // userId
             userEligible = userInfo[5]; // isActive
-            
+
             if (userEligible) {
               // Get eligible users count
               const stats = await contract.getContractStats();
               const eligibleCount = BigInt(stats[4]); // _eligibleUsersCount
-              
+
               if (eligibleCount > BigInt(0)) {
                 userShare = balance / eligibleCount;
               }
+            }
+
+            // Calculate total global pool claimed by this user from transactions
+            try {
+              const transactions = await contract.getUserTransactions(userId);
+
+              // Sum up all "Global Pool" transactions
+              for (const tx of transactions) {
+                const txType = tx[2]; // transactionType
+                const amount = tx[3]; // amount
+
+                if (txType === 'Global Pool') {
+                  totalClaimed += BigInt(amount);
+                }
+              }
+            } catch (error) {
+              console.warn('Could not fetch user transactions:', error);
             }
           } catch (error) {
             console.warn('Could not fetch user eligibility:', error);
@@ -63,6 +84,8 @@ export function useGlobalPool(userAddress?: string | null) {
           userEligible,
           userShare,
           userShareUSD: (Number(userShare) / 1e18).toFixed(2),
+          totalClaimed,
+          totalClaimedUSD: (Number(totalClaimed) / 1e18).toFixed(2),
         };
       } catch (error) {
         console.error('Error fetching global pool data:', error);

@@ -557,11 +557,11 @@ export default function IncomeDetails() {
                   </div>
 
                   <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-4 text-center">
-                    <div className="text-sm text-gray-400 mb-1">Pool Rate</div>
+                    <div className="text-sm text-gray-400 mb-1">My Total Claimed</div>
                     <div className="text-xl font-bold text-purple-400 orbitron">
-                      {Number(globalPool.percentage) / 100}%
+                      ${globalPool.totalClaimedUSD}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">Of deposits</div>
+                    <div className="text-xs text-gray-400 mt-1">From global pool</div>
                   </div>
                 </div>
 

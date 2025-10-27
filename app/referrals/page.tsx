@@ -57,7 +57,7 @@ export default function Referrals() {
   };
 
   const getLevelColor = (level: number) => {
-    const colors = ['green', 'blue', 'purple', 'orange', 'red', 'teal'];
+    const colors = ['green', 'blue', 'purple', 'orange', 'red', 'teal', 'pink', 'indigo', 'yellow', 'cyan'];
     return colors[level - 1] || 'gray';
   };
 
@@ -179,10 +179,10 @@ export default function Referrals() {
           <h2 className="text-xl font-bold text-white orbitron mb-4">Level Breakdown</h2>
 
           {loadingReferrals ? (
-            <ReferralCardSkeleton count={6} />
+            <ReferralCardSkeleton count={10} />
           ) : referralData && referralData.byLevel.length > 0 ? (
             <div className="space-y-3">
-              {referralData.byLevel.slice(0, 6).map((item) => (
+              {referralData.byLevel.slice(0, 10).map((item) => (
                 <div key={item.level} className="glass-card rounded-xl p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
