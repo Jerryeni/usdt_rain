@@ -9,6 +9,7 @@ import { useUpdateProfile } from '@/lib/hooks/useUpdateProfile';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import { formatAddress } from '@/lib/config/env';
+import { parseError } from '@/lib/utils/errorMessages';
 
 export default function ProfilePage() {
   const [isClient, setIsClient] = useState(false);
@@ -141,7 +142,14 @@ export default function ProfilePage() {
       }, 2000);
     } catch (error) {
       console.error('Profile update failed:', error);
-      setTxError((error as Error).message);
+      
+      // Parse error into user-friendly message
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
+      
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
