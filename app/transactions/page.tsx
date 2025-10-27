@@ -244,7 +244,16 @@ export default function TransactionsPage() {
 
                     <div className="flex items-center justify-between pt-3 border-t border-gray-700/30">
                       <div className="text-xs text-gray-400">
-                        ID: {tx.transactionId.toString()}
+                        {tx.userName ? (
+                          <span>
+                            <i className="fas fa-user mr-1"></i>
+                            {tx.userName}
+                          </span>
+                        ) : tx.userId ? (
+                          <span>User #{tx.userId.toString()}</span>
+                        ) : (
+                          <span>ID: {tx.transactionId.toString()}</span>
+                        )}
                       </div>
                       {tx.txHash && (
                         <a

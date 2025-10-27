@@ -104,16 +104,24 @@ export function useReferrals(userId?: bigint | null) {
             // Get user info
             const userInfo = await contract.getUserInfo(address);
             
-            // Get contact info
+            // Get contact info - try getUserProfile first (has named fields)
             let userName = '';
             let contactNumber = '';
             try {
-              const contactInfo = await contract.getUserContactById(refId);
-              userName = contactInfo.userName || '';
-              contactNumber = contactInfo.contactNumber || '';
+              const profile = await contract.getUserProfile(address);
+              userName = profile.userName || profile[0] || '';
+              contactNumber = profile.contactNumber || profile[1] || '';
             } catch (e) {
-              // Contact info might not be set
-              console.warn(`No contact info for user ${refId}`);
+              // If getUserProfile fails, try getUserContactById
+              try {
+                const contactInfo = await contract.getUserContactById(refId);
+                // getUserContactById returns: [address, userName, contactNumber, profileUpdatedAt]
+                userName = contactInfo[1] || '';
+                contactNumber = contactInfo[2] || '';
+              } catch (e2) {
+                // Contact info might not be set
+                console.warn(`No contact info for user ${refId}`);
+              }
             }
 
             return {
@@ -141,23 +149,48 @@ export function useReferrals(userId?: bigint | null) {
         const activeMembers = referralDetails.filter(ref => ref.isActive).length;
         const teamVolume = referralDetails.reduce((sum, ref) => sum + ref.totalEarned, BigInt(0));
 
-        // For multi-level referrals, we need to recursively fetch
-        // For now, we'll calculate based on direct referrals and their counts
-        let totalMembers = directCount;
-        for (const ref of referralDetails) {
-          totalMembers += ref.directReferrals;
-        }
-
-        // Fetch level income to calculate income by level
+        // Fetch level income
         const userAddress = await contract.getUserAddressById(userId);
         const levelIncome = await contract.getUserLevelIncome(userAddress);
 
-        // Build level referrals data
+        // Calculate network levels using BFS (Breadth-First Search)
+        // Optimized: Only traverse first 3 levels for faster loading
+        const levelCounts = new Map<number, number>();
+        let currentLevelUsers = referralIds; // Start with direct referrals
+        let totalMembers = directCount;
+
+        // Set Level 1 count
+        levelCounts.set(1, directCount);
+
+        // Traverse levels 2-3 only (for performance)
+        for (let level = 2; level <= 3 && currentLevelUsers.length > 0; level++) {
+          const nextLevelUsers: bigint[] = [];
+          
+          // Limit to first 20 users per level for performance
+          const batchSize = Math.min(currentLevelUsers.length, 20);
+          
+          // Fetch in parallel for better performance
+          const fetchPromises = currentLevelUsers.slice(0, batchSize).map(async (refId: bigint) => {
+            try {
+              return await contract.getUserReferrals(refId);
+            } catch (error) {
+              console.warn(`Error fetching referrals for user ${refId}:`, error);
+              return [];
+            }
+          });
+          
+          const results = await Promise.all(fetchPromises);
+          results.forEach(refs => nextLevelUsers.push(...refs));
+          
+          levelCounts.set(level, nextLevelUsers.length);
+          totalMembers += nextLevelUsers.length;
+          currentLevelUsers = nextLevelUsers;
+        }
+
+        // Build level referrals data with accurate counts
         const byLevel: LevelReferrals[] = Array.from({ length: 10 }, (_, i) => {
           const income = levelIncome[i];
-          
-          // For level 1, we know the count
-          const count = i === 0 ? directCount : 0; // We'd need recursive fetching for other levels
+          const count = levelCounts.get(i + 1) || 0;
           
           return {
             level: i + 1,
@@ -236,11 +269,19 @@ export function useReferralsPaginated(
             let userName = '';
             let contactNumber = '';
             try {
-              const contactInfo = await contract.getUserContactById(refId);
-              userName = contactInfo.userName || '';
-              contactNumber = contactInfo.contactNumber || '';
+              const profile = await contract.getUserProfile(address);
+              userName = profile.userName || profile[0] || '';
+              contactNumber = profile.contactNumber || profile[1] || '';
             } catch (e) {
-              // Contact info might not be set
+              // If getUserProfile fails, try getUserContactById
+              try {
+                const contactInfo = await contract.getUserContactById(refId);
+                // getUserContactById returns: [address, userName, contactNumber, profileUpdatedAt]
+                userName = contactInfo[1] || '';
+                contactNumber = contactInfo[2] || '';
+              } catch (e2) {
+                // Contact info might not be set
+              }
             }
 
             return {

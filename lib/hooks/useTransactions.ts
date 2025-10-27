@@ -15,6 +15,8 @@ export type TransactionType =
 export interface Transaction {
   transactionId: bigint;
   userAddress: string;
+  userName?: string;
+  userId?: bigint;
   type: TransactionType;
   amount: bigint;
   amountUSD: string;
@@ -99,17 +101,43 @@ export function useTransactions(
         // Fetch all transactions for the user
         const rawTransactions = await contract.getUserTransactions(userId);
         
-        // Map to our Transaction type
-        let transactions: Transaction[] = rawTransactions.map((tx: any) => ({
-          transactionId: tx.transactionId,
-          userAddress: tx.userAddress,
-          type: mapTransactionType(tx.transactionType),
-          amount: tx.amount,
-          amountUSD: formatToUSD(tx.amount),
-          level: tx.level && Number(tx.level) > 0 ? Number(tx.level) : undefined,
-          timestamp: new Date(Number(tx.timestamp) * 1000),
-          status: 'confirmed' as const,
-        }));
+        // Map to our Transaction type and fetch usernames
+        const transactionsPromises = rawTransactions.map(async (tx: any) => {
+          let userName = '';
+          let txUserId: bigint | undefined;
+          
+          try {
+            // Get user ID from address
+            txUserId = await contract.getUserIdByAddress(tx.userAddress);
+            
+            // Get username from user profile
+            if (txUserId && Number(txUserId) > 0) {
+              try {
+                const profile = await contract.getUserProfile(tx.userAddress);
+                userName = profile.userName || '';
+              } catch (e) {
+                // Profile might not be set
+              }
+            }
+          } catch (e) {
+            // User might not be registered
+          }
+          
+          return {
+            transactionId: tx.transactionId,
+            userAddress: tx.userAddress,
+            userName: userName || undefined,
+            userId: txUserId,
+            type: mapTransactionType(tx.transactionType),
+            amount: tx.amount,
+            amountUSD: formatToUSD(tx.amount),
+            level: tx.level && Number(tx.level) > 0 ? Number(tx.level) : undefined,
+            timestamp: new Date(Number(tx.timestamp) * 1000),
+            status: 'confirmed' as const,
+          };
+        });
+        
+        let transactions: Transaction[] = await Promise.all(transactionsPromises);
 
         // Filter by type if specified
         if (filterType !== 'all') {

@@ -240,7 +240,15 @@ export default function Referrals() {
                       </div>
                       <div>
                         <h3 className="text-white font-semibold">
-                          {referral.userName || `User #${referral.userId.toString()}`}
+                          {referral.userName ? (
+                            <span className="flex items-center">
+                              <i className="fas fa-id-badge text-cyan-400 text-xs mr-1.5"></i>
+                              {referral.userName}
+                              <span className="text-gray-500 text-xs ml-2">#{referral.userId.toString()}</span>
+                            </span>
+                          ) : (
+                            `User #${referral.userId.toString()}`
+                          )}
                         </h3>
                         <p className="text-gray-400 text-xs font-mono">
                           {referral.address.slice(0, 6)}...{referral.address.slice(-4)}
