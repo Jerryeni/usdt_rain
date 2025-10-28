@@ -527,6 +527,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getEligibleUsers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -535,6 +548,50 @@
       }
     ],
     "name": "getLevelIncomeStats",
+    "outputs": [
+      {
+        "internalType": "uint256[10]",
+        "name": "earned",
+        "type": "uint256[10]"
+      },
+      {
+        "internalType": "uint256[10]",
+        "name": "withdrawn",
+        "type": "uint256[10]"
+      },
+      {
+        "internalType": "uint256[10]",
+        "name": "available",
+        "type": "uint256[10]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalEarned",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalWithdrawn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalAvailable",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "userId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getLevelIncomeStatsById",
     "outputs": [
       {
         "internalType": "uint256[10]",
@@ -584,35 +641,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "limit",
-        "type": "uint256"
-      }
-    ],
-    "name": "getTopEarners",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "userAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "userIds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "earnings",
-        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -815,12 +843,31 @@
         "type": "address"
       }
     ],
-    "name": "getUserLevelCounts",
+    "name": "getUserLevelCounts10",
     "outputs": [
       {
-        "internalType": "uint256[5]",
+        "internalType": "uint256[10]",
         "name": "",
-        "type": "uint256[5]"
+        "type": "uint256[10]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "userId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserLevelCounts10ById",
+    "outputs": [
+      {
+        "internalType": "uint256[10]",
+        "name": "",
+        "type": "uint256[10]"
       }
     ],
     "stateMutability": "view",
@@ -995,6 +1042,44 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getUserTotalNetworkCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "userId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserTotalNetworkCountById",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "userId",
         "type": "uint256"
@@ -1038,118 +1123,6 @@
         "internalType": "struct USDTRain.Transaction[]",
         "name": "",
         "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "minEarnings",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxEarnings",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "limit",
-        "type": "uint256"
-      }
-    ],
-    "name": "getUsersByEarningsRange",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "userAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "userIds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "earnings",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "userIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "getUsersByIds",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "userAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "sponsorIds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "directReferralsCounts",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "totalEarnedAmounts",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "bool[]",
-        "name": "isActiveStatuses",
-        "type": "bool[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "userIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "getUsersContactInfo",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "userAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "string[]",
-        "name": "userNames",
-        "type": "string[]"
-      },
-      {
-        "internalType": "string[]",
-        "name": "contactNumbers",
-        "type": "string[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "updatedTimestamps",
-        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -1419,35 +1392,6 @@
         "internalType": "address",
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "partialId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "limit",
-        "type": "uint256"
-      }
-    ],
-    "name": "searchUsersById",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "userAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "userIds",
-        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",

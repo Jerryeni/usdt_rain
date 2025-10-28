@@ -58,12 +58,35 @@ export function useLevelIncome(userAddress?: string | null) {
       try {
         const contract = getReadContract(provider);
 
-        // Fetch all level income data in parallel
-        const [earnedArray, withdrawnArray, availableArray] = await Promise.all([
-          contract.getUserLevelIncome(userAddress),
-          contract.getUserLevelWithdrawn(userAddress),
-          contract.getUserAvailableLevelIncome(userAddress),
-        ]);
+        // Try to use the new optimized function first
+        let earnedArray, withdrawnArray, availableArray, totalEarned, totalWithdrawn, totalAvailable;
+        
+        try {
+          // Get user ID first
+          const userId = await contract.getUserIdByAddress(userAddress);
+          
+          // Use new getLevelIncomeStatsById function (single call!)
+          const stats = await contract.getLevelIncomeStatsById(userId);
+          earnedArray = stats.earned || stats[0];
+          withdrawnArray = stats.withdrawn || stats[1];
+          availableArray = stats.available || stats[2];
+          totalEarned = stats.totalEarned || stats[3];
+          totalWithdrawn = stats.totalWithdrawn || stats[4];
+          totalAvailable = stats.totalAvailable || stats[5];
+        } catch (error) {
+          console.warn('getLevelIncomeStatsById not available, using fallback');
+          // Fallback to old method (multiple calls)
+          [earnedArray, withdrawnArray, availableArray] = await Promise.all([
+            contract.getUserLevelIncome(userAddress),
+            contract.getUserLevelWithdrawn(userAddress),
+            contract.getUserAvailableLevelIncome(userAddress),
+          ]);
+          
+          // Calculate totals manually
+          totalEarned = earnedArray.reduce((sum: bigint, val: bigint) => sum + val, BigInt(0));
+          totalWithdrawn = withdrawnArray.reduce((sum: bigint, val: bigint) => sum + val, BigInt(0));
+          totalAvailable = availableArray.reduce((sum: bigint, val: bigint) => sum + val, BigInt(0));
+        }
 
         // Fetch level percentages (0-9 for 10 levels)
         const percentagePromises = Array.from({ length: 10 }, (_, i) =>
@@ -90,11 +113,7 @@ export function useLevelIncome(userAddress?: string | null) {
           };
         });
 
-        // Calculate totals
-        const totalEarned = levels.reduce((sum, level) => sum + level.earned, BigInt(0));
-        const totalWithdrawn = levels.reduce((sum, level) => sum + level.withdrawn, BigInt(0));
-        const totalAvailable = levels.reduce((sum, level) => sum + level.available, BigInt(0));
-
+        // Use totals from contract if available, otherwise calculate
         return {
           levels,
           totals: {

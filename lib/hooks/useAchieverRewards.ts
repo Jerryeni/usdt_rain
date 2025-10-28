@@ -56,10 +56,6 @@ export function useAchieverRewards(userAddress?: string | null) {
         const requirements = await contract.getAchieverRequirements();
         const requirementsArray = requirements.map((r: bigint) => Number(r));
         
-        // Get level counts (count of users at each achiever level in network)
-        const levelCounts = await contract.getUserLevelCounts(userAddress);
-        const levelCountsArray = levelCounts.map((c: bigint) => Number(c));
-        
         // Get achiever info (current level, achieved levels, direct referrals)
         const achieverInfo = await contract.getUserAchieverInfo(userAddress);
         const achievedLevels = achieverInfo[1].map((l: bigint) => Number(l));
@@ -67,6 +63,11 @@ export function useAchieverRewards(userAddress?: string | null) {
         
         // Get user ID for checking reward status
         const userId = await contract.getUserIdByAddress(userAddress);
+        
+        // Get level counts (count of users at each level in network)
+        // getUserLevelCounts10 returns array of 10 counts, we only need first 5 for achiever levels
+        const levelCounts10 = await contract.getUserLevelCounts10(userAddress);
+        const levelCountsArray = Array.from(levelCounts10 as bigint[]).slice(0, 5).map(c => Number(c));
         
         // Build detailed level information with reward status
         const levelDetails = await Promise.all(

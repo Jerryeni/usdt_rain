@@ -153,44 +153,34 @@ export function useReferrals(userId?: bigint | null) {
         const userAddress = await contract.getUserAddressById(userId);
         const levelIncome = await contract.getUserLevelIncome(userAddress);
 
-        // Calculate network levels using BFS (Breadth-First Search)
-        // Optimized: Only traverse first 3 levels for faster loading
-        const levelCounts = new Map<number, number>();
-        let currentLevelUsers = referralIds; // Start with direct referrals
+        // Use new contract function to get accurate level counts for all 10 levels
+        let levelCountsArray: bigint[] = [];
         let totalMembers = directCount;
-
-        // Set Level 1 count
-        levelCounts.set(1, directCount);
-
-        // Traverse levels 2-3 only (for performance)
-        for (let level = 2; level <= 3 && currentLevelUsers.length > 0; level++) {
-          const nextLevelUsers: bigint[] = [];
-          
-          // Limit to first 20 users per level for performance
-          const batchSize = Math.min(currentLevelUsers.length, 20);
-          
-          // Fetch in parallel for better performance
-          const fetchPromises = currentLevelUsers.slice(0, batchSize).map(async (refId: bigint) => {
-            try {
-              return await contract.getUserReferrals(refId);
-            } catch (error) {
-              console.warn(`Error fetching referrals for user ${refId}:`, error);
-              return [];
-            }
-          });
-          
-          const results = await Promise.all(fetchPromises);
-          results.forEach(refs => nextLevelUsers.push(...refs));
-          
-          levelCounts.set(level, nextLevelUsers.length);
-          totalMembers += nextLevelUsers.length;
-          currentLevelUsers = nextLevelUsers;
+        
+        try {
+          // Try the new getUserLevelCounts10ById function
+          levelCountsArray = await contract.getUserLevelCounts10ById(userId);
+          // Calculate total from all levels
+          totalMembers = levelCountsArray.reduce((sum, count) => sum + Number(count), 0);
+        } catch (error) {
+          console.warn('getUserLevelCounts10ById not available, using fallback');
+          // Fallback: only count direct referrals
+          levelCountsArray = Array.from({ length: 10 }, (_, i) => i === 0 ? BigInt(directCount) : BigInt(0));
+        }
+        
+        // Get accurate total network count from contract
+        let accurateTotalMembers = totalMembers;
+        try {
+          const networkCount = await contract.getUserTotalNetworkCountById(userId);
+          accurateTotalMembers = Number(networkCount);
+        } catch (error) {
+          console.warn('getUserTotalNetworkCountById not available, using calculated total');
         }
 
-        // Build level referrals data with accurate counts
+        // Build level referrals data with accurate counts from contract
         const byLevel: LevelReferrals[] = Array.from({ length: 10 }, (_, i) => {
           const income = levelIncome[i];
-          const count = levelCounts.get(i + 1) || 0;
+          const count = Number(levelCountsArray[i] || 0);
           
           return {
             level: i + 1,
@@ -208,7 +198,7 @@ export function useReferrals(userId?: bigint | null) {
           },
           byLevel,
           teamStats: {
-            totalMembers,
+            totalMembers: accurateTotalMembers,
             activeMembers,
             teamVolume,
             teamVolumeUSD: formatToUSD(teamVolume),

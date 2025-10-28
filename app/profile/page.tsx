@@ -16,6 +16,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [userName, setUserName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [countryCode, setCountryCode] = useState('');
   const [validationError, setValidationError] = useState('');
 
   const router = useRouter();
@@ -67,6 +69,40 @@ export default function ProfilePage() {
     createRain();
   }, []);
 
+  // Country data with codes
+  const countries = [
+    { name: 'Nigeria', code: '+234' },
+    { name: 'India', code: '+91' },
+    { name: 'United States', code: '+1' },
+    { name: 'United Kingdom', code: '+44' },
+    { name: 'Canada', code: '+1' },
+    { name: 'Australia', code: '+61' },
+    { name: 'Germany', code: '+49' },
+    { name: 'France', code: '+33' },
+    { name: 'Italy', code: '+39' },
+    { name: 'Spain', code: '+34' },
+    { name: 'Brazil', code: '+55' },
+    { name: 'Mexico', code: '+52' },
+    { name: 'Argentina', code: '+54' },
+    { name: 'South Africa', code: '+27' },
+    { name: 'Kenya', code: '+254' },
+    { name: 'Ghana', code: '+233' },
+    { name: 'Egypt', code: '+20' },
+    { name: 'China', code: '+86' },
+    { name: 'Japan', code: '+81' },
+    { name: 'South Korea', code: '+82' },
+    { name: 'Singapore', code: '+65' },
+    { name: 'Malaysia', code: '+60' },
+    { name: 'Indonesia', code: '+62' },
+    { name: 'Thailand', code: '+66' },
+    { name: 'Philippines', code: '+63' },
+    { name: 'Vietnam', code: '+84' },
+    { name: 'Pakistan', code: '+92' },
+    { name: 'Bangladesh', code: '+880' },
+    { name: 'UAE', code: '+971' },
+    { name: 'Saudi Arabia', code: '+966' },
+  ];
+
   // Initialize form with user data
   useEffect(() => {
     if (userInfo) {
@@ -74,6 +110,17 @@ export default function ProfilePage() {
       setContactNumber(userInfo.contactNumber || '');
     }
   }, [userInfo]);
+
+  // Handle country selection
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const country = e.target.value;
+    setSelectedCountry(country);
+    
+    const selectedCountryData = countries.find(c => c.name === country);
+    if (selectedCountryData) {
+      setCountryCode(selectedCountryData.code);
+    }
+  };
 
   const goBack = () => {
     window.history.back();
@@ -288,18 +335,48 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {/* Country Selector */}
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Country</label>
+              {isEditing ? (
+                <select
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                >
+                  <option value="">Select your country</option>
+                  {countries.map((country) => (
+                    <option key={country.name} value={country.name}>
+                      {country.name} ({country.code})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="px-4 py-3 bg-gray-800/30 border border-gray-700/50 rounded-lg text-white">
+                  {selectedCountry || 'Not set'}
+                </div>
+              )}
+            </div>
+
             {/* Contact Number */}
             <div>
               <label className="block text-sm text-gray-400 mb-2">Contact Number</label>
               {isEditing ? (
-                <input
-                  type="tel"
-                  value={contactNumber}
-                  onChange={(e) => setContactNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-colors"
-                  placeholder="Enter your contact number"
-                  maxLength={20}
-                />
+                <div className="flex space-x-2">
+                  {countryCode && (
+                    <div className="px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-cyan-400 font-semibold min-w-[80px] flex items-center justify-center">
+                      {countryCode}
+                    </div>
+                  )}
+                  <input
+                    type="tel"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
+                    className="flex-1 px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                    placeholder="Enter your contact number"
+                    maxLength={20}
+                  />
+                </div>
               ) : (
                 <div className="px-4 py-3 bg-gray-800/30 border border-gray-700/50 rounded-lg text-white">
                   {userInfo?.contactNumber || 'Not set'}
