@@ -24,6 +24,9 @@ export interface Transaction {
   timestamp: Date;
   txHash?: string;
   status: 'confirmed';
+  sourceUserId?: bigint;
+  sourceUserName?: string;
+  sourceUserAddress?: string;
 }
 
 export interface TransactionData {
@@ -101,16 +104,16 @@ export function useTransactions(
         // Fetch all transactions for the user
         const rawTransactions = await contract.getUserTransactions(userId);
         
-        // Map to our Transaction type and fetch usernames
         const transactionsPromises = rawTransactions.map(async (tx: any) => {
           let userName = '';
           let txUserId: bigint | undefined;
+          let sourceUserId: bigint | undefined;
+          let sourceUserName: string | undefined;
+          let sourceUserAddress: string | undefined;
           
           try {
-            // Get user ID from address
             txUserId = await contract.getUserIdByAddress(tx.userAddress);
             
-            // Get username from user profile
             if (txUserId && Number(txUserId) > 0) {
               try {
                 const profile = await contract.getUserProfile(tx.userAddress);
@@ -123,17 +126,34 @@ export function useTransactions(
             // User might not be registered
           }
           
+          const txType = mapTransactionType(tx.transactionType);
+          
+          if (tx.sourceUserId && Number(tx.sourceUserId) > 0) {
+            sourceUserId = tx.sourceUserId;
+            
+            try {
+              sourceUserAddress = await contract.getUserAddressById(sourceUserId);
+              const sourceProfile = await contract.getUserProfile(sourceUserAddress);
+              sourceUserName = sourceProfile.userName || undefined;
+            } catch (e) {
+              console.warn('Error fetching source user profile:', e);
+            }
+          }
+          
           return {
             transactionId: tx.transactionId,
             userAddress: tx.userAddress,
             userName: userName || undefined,
             userId: txUserId,
-            type: mapTransactionType(tx.transactionType),
+            type: txType,
             amount: tx.amount,
             amountUSD: formatToUSD(tx.amount),
             level: tx.level && Number(tx.level) > 0 ? Number(tx.level) : undefined,
             timestamp: new Date(Number(tx.timestamp) * 1000),
             status: 'confirmed' as const,
+            sourceUserId,
+            sourceUserName,
+            sourceUserAddress,
           };
         });
         

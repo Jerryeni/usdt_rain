@@ -242,30 +242,44 @@ export default function TransactionsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-700/30">
-                      <div className="text-xs text-gray-400">
-                        {tx.userName ? (
-                          <span>
-                            <i className="fas fa-user mr-1"></i>
-                            {tx.userName}
-                          </span>
-                        ) : tx.userId ? (
-                          <span>User #{tx.userId.toString()}</span>
-                        ) : (
-                          <span>ID: {tx.transactionId.toString()}</span>
+                    <div className="pt-3 border-t border-gray-700/30 space-y-2">
+                      {tx.sourceUserName && tx.type === 'level_income' && (
+                        <div className="flex items-center text-xs">
+                          <span className="text-gray-400 mr-2">From:</span>
+                          <div className="flex items-center bg-cyan-500/10 px-2 py-1 rounded">
+                            <i className="fas fa-user text-cyan-400 mr-1"></i>
+                            <span className="text-cyan-400 font-medium">{tx.sourceUserName}</span>
+                            {tx.sourceUserId && (
+                              <span className="text-gray-400 ml-1">#{tx.sourceUserId.toString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-400">
+                          {tx.userName ? (
+                            <span>
+                              <i className="fas fa-user mr-1"></i>
+                              {tx.userName}
+                            </span>
+                          ) : tx.userId ? (
+                            <span>User #{tx.userId.toString()}</span>
+                          ) : (
+                            <span>ID: {tx.transactionId.toString()}</span>
+                          )}
+                        </div>
+                        {tx.txHash && (
+                          <a
+                            href={getTransactionUrl(tx.txHash)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1 transition-colors"
+                          >
+                            <span>View on BSCScan</span>
+                            <i className="fas fa-external-link-alt"></i>
+                          </a>
                         )}
                       </div>
-                      {tx.txHash && (
-                        <a
-                          href={getTransactionUrl(tx.txHash)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1 transition-colors"
-                        >
-                          <span>View on BSCScan</span>
-                          <i className="fas fa-external-link-alt"></i>
-                        </a>
-                      )}
                     </div>
                   </div>
                 );

@@ -107,9 +107,34 @@ export default function ProfilePage() {
   useEffect(() => {
     if (userInfo) {
       setUserName(userInfo.userName || '');
-      setContactNumber(userInfo.contactNumber || '');
+      
+      // Parse contact number to extract country code and number
+      const fullContact = userInfo.contactNumber || '';
+      if (fullContact) {
+        // Try to find matching country code
+        const matchedCountry = countries.find(c => fullContact.startsWith(c.code));
+        if (matchedCountry) {
+          setCountryCode(matchedCountry.code);
+          // Remove country code from the number
+          setContactNumber(fullContact.substring(matchedCountry.code.length).trim());
+        } else {
+          setContactNumber(fullContact);
+        }
+      }
+      
+      // Load country name from localStorage
+      if (address) {
+        const savedCountry = localStorage.getItem(`country_${address}`);
+        if (savedCountry) {
+          setSelectedCountry(savedCountry);
+          const countryData = countries.find(c => c.name === savedCountry);
+          if (countryData && !countryCode) {
+            setCountryCode(countryData.code);
+          }
+        }
+      }
     }
-  }, [userInfo]);
+  }, [userInfo, address]);
 
   // Handle country selection
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -137,7 +162,26 @@ export default function ProfilePage() {
     // Reset to original values
     if (userInfo) {
       setUserName(userInfo.userName || '');
-      setContactNumber(userInfo.contactNumber || '');
+      
+      // Parse contact number again
+      const fullContact = userInfo.contactNumber || '';
+      if (fullContact) {
+        const matchedCountry = countries.find(c => fullContact.startsWith(c.code));
+        if (matchedCountry) {
+          setCountryCode(matchedCountry.code);
+          setContactNumber(fullContact.substring(matchedCountry.code.length).trim());
+        } else {
+          setContactNumber(fullContact);
+        }
+      }
+      
+      // Restore country from localStorage
+      if (address) {
+        const savedCountry = localStorage.getItem(`country_${address}`);
+        if (savedCountry) {
+          setSelectedCountry(savedCountry);
+        }
+      }
     }
   };
 
@@ -158,6 +202,11 @@ export default function ProfilePage() {
       return;
     }
 
+    if (!selectedCountry) {
+      setValidationError('Please select a country');
+      return;
+    }
+
     setValidationError('');
     setTxModalOpen(true);
     setTxStatus('estimating');
@@ -166,10 +215,19 @@ export default function ProfilePage() {
 
     try {
       setTxStatus('signing');
+      
+      // Combine country code with contact number for storage
+      const fullContactNumber = `${countryCode}${contactNumber.trim()}`;
+      
       const result = await updateProfile.mutateAsync({
         userName: userName.trim(),
-        contactNumber: contactNumber.trim(),
+        contactNumber: fullContactNumber,
       });
+
+      // Save country name to localStorage
+      if (address) {
+        localStorage.setItem(`country_${address}`, selectedCountry);
+      }
 
       setTxHash(result.transactionHash);
       setTxStatus('pending');
@@ -371,10 +429,14 @@ export default function ProfilePage() {
                   <input
                     type="tel"
                     value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
+                    onChange={(e) => {
+                      // Only allow numbers
+                      const value = e.target.value.replace(/\D/g, '');
+                      setContactNumber(value);
+                    }}
                     className="flex-1 px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-400 transition-colors"
                     placeholder="Enter your contact number"
-                    maxLength={20}
+                    maxLength={15}
                   />
                 </div>
               ) : (

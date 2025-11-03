@@ -16,8 +16,8 @@ import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import type { NonWorkingIncomeData } from '@/lib/hooks/useNonWorkingIncome';
+import { parseError } from '@/lib/utils/errorMessages';
 
-// Monthly Rewards Content Component with Countdown
 function MonthlyRewardsContent({ 
   nonWorkingIncome, 
   claimNonWorking, 
@@ -55,10 +55,10 @@ function MonthlyRewardsContent({
         <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-4 text-center">
           <div className="text-sm text-orange-300 mb-2">
             <i className="fas fa-info-circle mr-2"></i>
-            Not Eligible for Monthly Rewards
+            Not Eligible for Non-Working Rewards
           </div>
           <div className="text-sm text-gray-400 mt-2">
-            Monthly rewards are only available for users without direct referrals. Since you have an active team, you earn through Level Income and Global Pool instead!
+            Non-working rewards are only available for users without direct referrals. Since you have an active team, you earn through Level Income and Global Pool instead!
           </div>
         </div>
       ) : nonWorkingIncome.canClaim ? (
@@ -75,7 +75,7 @@ function MonthlyRewardsContent({
           ) : (
             <>
               <i className="fas fa-gift mr-2"></i>
-              Claim Monthly Reward
+              Claim Non-Working Reward
             </>
           )}
         </button>
@@ -127,7 +127,7 @@ function MonthlyRewardsContent({
 
           <div className="text-center text-xs text-gray-400">
             <i className="fas fa-info-circle mr-1"></i>
-            Monthly rewards can be claimed every 30 days
+            Rewards can be claimed every 5 minutes
           </div>
         </div>
       )}
@@ -279,20 +279,10 @@ export default function IncomeDetails() {
     } catch (error) {
       console.error('Claim achiever reward failed:', error);
       
-      let errorMessage = 'Transaction failed';
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.reason) {
-          errorMessage = err.reason;
-        } else if (err.message) {
-          const match = err.message.match(/reason="([^"]+)"/);
-          if (match) {
-            errorMessage = match[1];
-          } else {
-            errorMessage = err.message;
-          }
-        }
-      }
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
       
       setTxError(errorMessage);
       setTxStatus('failed');
@@ -321,24 +311,12 @@ export default function IncomeDetails() {
       }, 2000);
     } catch (error) {
       console.error('Claim non-working income failed:', error);
-
-      // Extract user-friendly error message
-      let errorMessage = 'Transaction failed';
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.reason) {
-          errorMessage = err.reason;
-        } else if (err.message) {
-          // Try to extract the revert reason from the message
-          const match = err.message.match(/reason="([^"]+)"/);
-          if (match) {
-            errorMessage = match[1];
-          } else {
-            errorMessage = err.message;
-          }
-        }
-      }
-
+      
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
+      
       setTxError(errorMessage);
       setTxStatus('failed');
     }
@@ -433,36 +411,28 @@ export default function IncomeDetails() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-white counter-animation">
-                    {formatUsd(userInfo?.totalEarned)}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-6 text-center">
+                  <div className="text-sm text-gray-400 mb-2">
+                    <i className="fas fa-coins mr-2"></i>
+                    Total Earned
                   </div>
-                  <p className="text-gray-400 text-xs">Total Earned</p>
+                  <div className="text-3xl font-bold text-white counter-animation orbitron">
+                    ${formatUsd(userInfo?.totalEarned)}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2">All time earnings</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-green-400 counter-animation">
-                    {formatUsd(userInfo?.totalWithdrawn)}
+                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-xl p-6 text-center">
+                  <div className="text-sm text-gray-400 mb-2">
+                    <i className="fas fa-check-circle mr-2"></i>
+                    Total Claimed
                   </div>
-                  <p className="text-gray-400 text-xs">Total Claimed</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-cyan-400 counter-animation">
-                    {levelIncome ? `$${levelIncome.totals.availableUSD}` : '$0.00'}
+                  <div className="text-3xl font-bold text-green-400 counter-animation orbitron">
+                    ${formatUsd(userInfo?.totalWithdrawn)}
                   </div>
-                  <p className="text-gray-400 text-xs">Available</p>
+                  <div className="text-xs text-gray-400 mt-2">Successfully withdrawn</div>
                 </div>
               </div>
-
-              <button
-                className={`w-full claim-button text-cyan-400 font-bold py-4 px-6 rounded-xl orbitron text-lg ${!levelIncome || levelIncome.totals.available === BigInt(0) ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                onClick={handleClaimAll}
-                disabled={!levelIncome || levelIncome.totals.available === BigInt(0) || withdrawAll.isPending}
-              >
-                <i className="fas fa-download mr-2"></i>
-                {withdrawAll.isPending ? 'Processing...' : `Claim All ($${levelIncome?.totals.availableUSD || '0.00'})`}
-              </button>
             </>
           )}
         </div>
@@ -646,37 +616,49 @@ export default function IncomeDetails() {
                     return (
                       <div
                         key={levelDetail.level}
-                        className={`p-3 rounded-lg ${levelDetail.isAchieved
-                          ? 'bg-green-500/10 border border-green-400/20'
-                          : index === achieverRewards.currentLevel
-                            ? 'bg-pink-500/10 border border-pink-400/20'
-                            : 'bg-gray-500/10 border border-gray-400/20'
-                          }`}
+                        className={`p-3 rounded-lg ${
+                          levelDetail.rewardStatus === 'claimed'
+                            ? 'bg-green-500/10 border border-green-400/20'
+                            : levelDetail.rewardStatus === 'unclaimed'
+                              ? 'bg-pink-500/10 border border-pink-400/20'
+                              : levelDetail.rewardStatus === 'pending-admin'
+                                ? 'bg-blue-500/10 border border-blue-400/20'
+                                : 'bg-gray-500/10 border border-gray-400/20'
+                        }`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${levelDetail.isAchieved
-                              ? 'bg-green-500/20'
-                              : index === achieverRewards.currentLevel
-                                ? 'bg-pink-500/20'
-                                : 'bg-gray-500/20'
-                              }`}>
-                              {levelDetail.isAchieved ? (
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                              levelDetail.rewardStatus === 'claimed'
+                                ? 'bg-green-500/20'
+                                : levelDetail.rewardStatus === 'unclaimed'
+                                  ? 'bg-pink-500/20'
+                                  : levelDetail.rewardStatus === 'pending-admin'
+                                    ? 'bg-blue-500/20'
+                                    : 'bg-gray-500/20'
+                            }`}>
+                              {levelDetail.rewardStatus === 'claimed' ? (
                                 <i className="fas fa-check text-green-400"></i>
+                              ) : levelDetail.rewardStatus === 'pending-admin' ? (
+                                <i className="fas fa-clock text-blue-400"></i>
                               ) : (
-                                <span className={`text-sm font-bold ${index === achieverRewards.currentLevel ? 'text-pink-400' : 'text-gray-400'
-                                  }`}>
+                                <span className={`text-sm font-bold ${
+                                  levelDetail.rewardStatus === 'unclaimed' ? 'text-pink-400' : 'text-gray-400'
+                                }`}>
                                   {levelDetail.level}
                                 </span>
                               )}
                             </div>
                             <div>
-                              <div className={`font-semibold ${levelDetail.isAchieved
-                                ? 'text-green-400'
-                                : index === achieverRewards.currentLevel
-                                  ? 'text-pink-400'
-                                  : 'text-gray-400'
-                                }`}>
+                              <div className={`font-semibold ${
+                                levelDetail.rewardStatus === 'claimed'
+                                  ? 'text-green-400'
+                                  : levelDetail.rewardStatus === 'unclaimed'
+                                    ? 'text-pink-400'
+                                    : levelDetail.rewardStatus === 'pending-admin'
+                                      ? 'text-blue-400'
+                                      : 'text-gray-400'
+                              }`}>
                                 Level {levelDetail.level}
                               </div>
                               <div className="text-xs text-gray-400">
@@ -693,17 +675,17 @@ export default function IncomeDetails() {
                           </div>
                           <div className="w-full bg-gray-700 rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full transition-all duration-500 ${levelDetail.isAchieved
-                                ? 'bg-green-500'
-                                : index === achieverRewards.currentLevel
-                                  ? 'bg-gradient-to-r from-pink-500 to-purple-500'
-                                  : 'bg-gray-600'
-                                }`}
+                              className={`h-2 rounded-full transition-all duration-500 ${
+                                levelDetail.rewardStatus === 'claimed'
+                                  ? 'bg-green-500'
+                                  : levelDetail.meetsRequirement
+                                    ? 'bg-gradient-to-r from-pink-500 to-purple-500'
+                                    : 'bg-gray-600'
+                              }`}
                               style={{ width: `${Math.min((levelDetail.currentCount / levelDetail.requirement) * 100, 100)}%` }}
                             ></div>
                           </div>
                         </div>
-                        {/* Claim Button */}
                         {levelDetail.rewardStatus === 'not-eligible' ? (
                           <button
                             disabled
@@ -712,6 +694,14 @@ export default function IncomeDetails() {
                             <i className="fas fa-lock mr-2"></i>
                             Not Eligible
                           </button>
+                        ) : levelDetail.rewardStatus === 'pending-admin' ? (
+                          <Link
+                            href="/help"
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center justify-center"
+                          >
+                            <i className="fas fa-headset mr-2"></i>
+                            Contact Admin for Approval
+                          </Link>
                         ) : levelDetail.rewardStatus === 'claimed' ? (
                           <button
                             disabled
@@ -767,14 +757,14 @@ export default function IncomeDetails() {
         </div>
       </section>
 
-      {/* Monthly Rewards Section */}
+      {/* Non-Working Rewards Section */}
       <section className="px-4 mb-6">
         <div className="slide-in" style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center mb-4">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center mr-3">
-              <i className="fas fa-calendar-check text-green-400 text-sm"></i>
+              <i className="fas fa-clock text-green-400 text-sm"></i>
             </div>
-            <h2 className="text-xl font-bold text-white orbitron">Monthly Rewards</h2>
+            <h2 className="text-xl font-bold text-white orbitron">Non-Working Rewards</h2>
           </div>
 
           <div className="glass-card rounded-2xl p-6">
@@ -791,8 +781,8 @@ export default function IncomeDetails() {
               />
             ) : (
               <div className="text-center py-8 text-gray-400">
-                <i className="fas fa-calendar-times text-3xl mb-3"></i>
-                <p>Monthly rewards data unavailable</p>
+                <i className="fas fa-clock text-3xl mb-3"></i>
+                <p>Non-working rewards data unavailable</p>
                 <p className="text-sm mt-2">Connect your wallet and activate your account</p>
               </div>
             )}
