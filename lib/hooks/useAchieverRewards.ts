@@ -65,11 +65,17 @@ export function useAchieverRewards(userAddress?: string | null) {
             let description = '';
             
             if (level === 1) {
+              // Level 1 requires direct referrals
               count = directReferrals;
               description = `Requires ${requirement} direct referrals`;
             } else {
-              count = levelCountsArray[level - 2];
-              description = `Requires ${requirement} Level ${level - 1} users`;
+              // Level 2+ requires users at the previous network level
+              // levelCountsArray[0] = Level 1 users, levelCountsArray[1] = Level 2 users, etc.
+              // For Achiever Level 2, we need Level 1 users (index 0)
+              // For Achiever Level 3, we need Level 2 users (index 1), etc.
+              const networkLevelIndex = level - 2;
+              count = levelCountsArray[networkLevelIndex] || 0;
+              description = `Requires ${requirement} users at Network Level ${level - 1}`;
             }
             
             const meetsRequirement = count >= requirement;
@@ -93,15 +99,19 @@ export function useAchieverRewards(userAddress?: string | null) {
             let canClaim = false;
             
             if (!meetsRequirement) {
+              // User hasn't met the level count requirement yet
               rewardStatus = 'not-eligible';
-            } else if (!isMarkedByAdmin) {
-              rewardStatus = 'pending-admin';
-              needsAdminApproval = true;
             } else if (isRewarded) {
+              // User has already claimed the reward
               rewardStatus = 'claimed';
-            } else {
+            } else if (isMarkedByAdmin) {
+              // Admin has marked, user can now claim
               rewardStatus = 'unclaimed';
               canClaim = true;
+            } else {
+              // User meets requirement but admin hasn't marked yet - contact admin
+              rewardStatus = 'pending-admin';
+              needsAdminApproval = true;
             }
             
             return {

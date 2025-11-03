@@ -581,7 +581,10 @@ export default function IncomeDetails() {
                     Level {achieverRewards.currentLevel}
                   </div>
                   <div className="text-sm text-gray-400">
-                    {achieverRewards.currentCount} / {achieverRewards.nextLevelRequirement} {achieverRewards.currentLevel === 0 ? 'Direct Referrals' : `Level ${achieverRewards.currentLevel} Users`}
+                    {achieverRewards.currentLevel === 0 
+                      ? `${achieverRewards.currentCount} / ${achieverRewards.nextLevelRequirement} Direct Referrals to reach Level 1`
+                      : `${achieverRewards.currentCount} / ${achieverRewards.nextLevelRequirement} users to reach Level ${achieverRewards.currentLevel + 1}`
+                    }
                   </div>
                 </div>
 
@@ -737,13 +740,13 @@ export default function IncomeDetails() {
                   })}
                 </div>
 
-                {achieverRewards.currentLevel < achieverRewards.requirements.length && (
+                {achieverRewards.currentLevel < achieverRewards.requirements.length && achieverRewards.nextLevelRequirement > achieverRewards.currentCount && (
                   <div className="mt-4 bg-blue-500/10 border border-blue-400/20 rounded-xl p-3">
                     <p className="text-sm text-blue-300 text-center">
                       <i className="fas fa-info-circle mr-2"></i>
                       {achieverRewards.currentLevel === 0 
                         ? `Invite ${achieverRewards.nextLevelRequirement - achieverRewards.currentCount} more direct referrals to reach Level 1`
-                        : `Get ${achieverRewards.nextLevelRequirement - achieverRewards.currentCount} more Level ${achieverRewards.currentLevel} users to reach Level ${achieverRewards.currentLevel + 1}`
+                        : `Get ${achieverRewards.nextLevelRequirement - achieverRewards.currentCount} more users at Network Level ${achieverRewards.currentLevel} to reach Achiever Level ${achieverRewards.currentLevel + 1}`
                       }
                     </p>
                   </div>
