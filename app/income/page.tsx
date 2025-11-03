@@ -365,9 +365,9 @@ export default function IncomeDetails() {
       {/* Header with Navigation */}
       <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-arrow-left text-cyan-400"></i>
-          </button>
+          <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-home text-cyan-400"></i>
+          </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">Income Details</h1>
             <p className="text-gray-400 text-xs">Level + Global Pool</p>

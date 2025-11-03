@@ -128,6 +128,14 @@ export function useTransactions(
           
           const txType = mapTransactionType(tx.transactionType);
           
+          console.log('Transaction data:', {
+            id: tx.transactionId?.toString(),
+            type: tx.transactionType,
+            hasSourceUserId: !!tx.sourceUserId,
+            sourceUserId: tx.sourceUserId?.toString(),
+            level: tx.level?.toString(),
+          });
+          
           if (tx.sourceUserId && Number(tx.sourceUserId) > 0) {
             sourceUserId = tx.sourceUserId;
             

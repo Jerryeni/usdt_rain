@@ -147,9 +147,9 @@ export default function TransactionsPage() {
       {/* Header with Navigation */}
       <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-arrow-left text-cyan-400"></i>
-          </button>
+          <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-home text-cyan-400"></i>
+          </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">Transactions</h1>
             <p className="text-gray-400 text-xs">Transaction History</p>
@@ -243,16 +243,25 @@ export default function TransactionsPage() {
                     </div>
 
                     <div className="pt-3 border-t border-gray-700/30 space-y-2">
-                      {tx.sourceUserName && tx.type === 'level_income' && (
+                      {tx.type === 'level_income' && (
                         <div className="flex items-center text-xs">
                           <span className="text-gray-400 mr-2">From:</span>
-                          <div className="flex items-center bg-cyan-500/10 px-2 py-1 rounded">
-                            <i className="fas fa-user text-cyan-400 mr-1"></i>
-                            <span className="text-cyan-400 font-medium">{tx.sourceUserName}</span>
-                            {tx.sourceUserId && (
-                              <span className="text-gray-400 ml-1">#{tx.sourceUserId.toString()}</span>
-                            )}
-                          </div>
+                          {tx.sourceUserName || tx.sourceUserId ? (
+                            <div className="flex items-center bg-cyan-500/10 px-2 py-1 rounded">
+                              <i className="fas fa-user text-cyan-400 mr-1"></i>
+                              <span className="text-cyan-400 font-medium">
+                                {tx.sourceUserName || `User #${tx.sourceUserId?.toString()}`}
+                              </span>
+                              {tx.sourceUserId && tx.sourceUserName && (
+                                <span className="text-gray-400 ml-1">#{tx.sourceUserId.toString()}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center bg-gray-500/10 px-2 py-1 rounded">
+                              <i className="fas fa-user text-gray-400 mr-1"></i>
+                              <span className="text-gray-400 font-medium">Network Member</span>
+                            </div>
+                          )}
                         </div>
                       )}
                       <div className="flex items-center justify-between">

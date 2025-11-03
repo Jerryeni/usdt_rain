@@ -547,30 +547,30 @@ export default function Dashboard() {
               )}
               <span>Dashboard</span>
             </Link>
-            <Link href="/wallet" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
+            {/* <Link href="/wallet" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-wallet w-5"></i>
               ) : (
                 <div className="w-4 h-4 bg-gray-400 rounded"></div>
               )}
               <span>Wallet</span>
-            </Link>
-            <Link href="/income" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
+            </Link> */}
+            {/* <Link href="/income" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-chart-line w-5"></i>
               ) : (
                 <div className="w-4 h-4 bg-gray-400 rounded"></div>
               )}
               <span>Income Details</span>
-            </Link>
-            <Link href="/referrals" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
+            </Link> */}
+            {/* <Link href="/referrals" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-users w-5"></i>
               ) : (
                 <div className="w-4 h-4 bg-gray-400 rounded"></div>
               )}
               <span>My Team</span>
-            </Link>
+            </Link> */}
             <Link href="/share" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-share-alt w-5"></i>
@@ -587,14 +587,14 @@ export default function Dashboard() {
               )}
               <span>Leaderboard</span>
             </Link>
-            <Link href="/transactions" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
+            {/* <Link href="/transactions" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-history w-5"></i>
               ) : (
                 <div className="w-4 h-4 bg-gray-400 rounded"></div>
               )}
               <span>Transaction History</span>
-            </Link>
+            </Link> */}
             <Link href="/settings" className="flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:bg-white/10 transition-all cursor-pointer">
               {fontAwesomeLoaded ? (
                 <i className="fas fa-cog w-5"></i>

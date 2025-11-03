@@ -60,6 +60,19 @@ export function parseError(error: unknown): ParsedError {
     };
   }
 
+  // Circuit breaker error (MetaMask rate limiting)
+  if (
+    errorString.includes('circuit breaker') ||
+    errorString.includes('too many requests') ||
+    errorString.includes('rate limit')
+  ) {
+    return {
+      title: 'Network Busy',
+      message: 'Too many requests to the network. Please wait a moment.',
+      action: 'Try again in 30 seconds or refresh your wallet.',
+    };
+  }
+
   // Network errors
   if (
     errorString.includes('network') ||

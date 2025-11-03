@@ -86,9 +86,9 @@ export default function Referrals() {
       {/* Header with Navigation */}
       <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-arrow-left text-cyan-400"></i>
-          </button>
+          <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-home text-cyan-400"></i>
+          </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">My Referrals</h1>
             <p className="text-gray-400 text-xs">Team Management</p>
@@ -250,9 +250,16 @@ export default function Referrals() {
                             `User #${referral.userId.toString()}`
                           )}
                         </h3>
-                        <p className="text-gray-400 text-xs font-mono">
-                          {referral.address.slice(0, 6)}...{referral.address.slice(-4)}
-                        </p>
+                        {referral.contactNumber ? (
+                          <p className="text-cyan-400 text-xs flex items-center mt-0.5">
+                            <i className="fas fa-phone text-xs mr-1.5"></i>
+                            {referral.contactNumber}
+                          </p>
+                        ) : (
+                          <p className="text-gray-400 text-xs font-mono">
+                            {referral.address.slice(0, 6)}...{referral.address.slice(-4)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">

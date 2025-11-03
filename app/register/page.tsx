@@ -8,6 +8,7 @@ import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useRegisterUser } from '@/lib/hooks/useRegisterUser';
 import { getReadContract } from '@/lib/contracts/USDTRain';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
+import { parseError } from '@/lib/utils/errorMessages';
 
 function RegisterPageContent() {
   const [isClient, setIsClient] = useState(false);
@@ -241,25 +242,12 @@ function RegisterPageContent() {
     } catch (error) {
       console.error('Registration failed:', error);
       
-      // Parse error for user-friendly message
-      const errorMessage = (error as Error)?.message || String(error);
-      const errorCode = (error as any)?.code;
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
       
-      let userFriendlyError = 'Registration failed. Please try again.';
-      
-      if (errorCode === 'ACTION_REJECTED' || errorCode === 4001 || errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
-        userFriendlyError = 'You cancelled the transaction in your wallet.';
-      } else if (errorMessage.includes('insufficient funds')) {
-        userFriendlyError = 'Insufficient BNB balance to pay for gas fees.';
-      } else if (errorMessage.includes('Invalid sponsor')) {
-        userFriendlyError = 'Invalid sponsor ID. Please check and try again.';
-      } else if (errorMessage.includes('Already registered')) {
-        userFriendlyError = 'This wallet is already registered.';
-      } else if (errorMessage.includes('network') || errorMessage.includes('Network')) {
-        userFriendlyError = 'Network error. Please check your connection.';
-      }
-      
-      setTxError(userFriendlyError);
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
