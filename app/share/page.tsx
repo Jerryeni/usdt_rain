@@ -6,6 +6,8 @@ import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useReferrals } from '@/lib/hooks/useReferrals';
 import { useToast } from '@/components/ui/use-toast';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 export default function SharePage() {
   const [isClient, setIsClient] = useState(false);
@@ -15,6 +17,7 @@ export default function SharePage() {
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: referralData, isLoading: loadingReferrals } = useReferrals(userInfo?.userId);
   const { toast } = useToast();
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Generate referral link
   const referralLink = userInfo?.userId
@@ -166,16 +169,21 @@ export default function SharePage() {
       {/* Header with Navigation */}
       <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-arrow-left text-cyan-400"></i>
-          </button>
+          <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-home text-cyan-400"></i>
+          </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">Share & Earn</h1>
             <p className="text-gray-400 text-xs">Invite Friends</p>
           </div>
-          <div className="w-10 h-10"></div>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
+          </button>
         </div>
       </header>
+
+      {/* Sidebar */}
+      <Sidebar onClose={closeSidebar} />
 
       {/* Share Stats */}
       <section className="px-4 py-6">

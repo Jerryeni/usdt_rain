@@ -8,6 +8,8 @@ import { useTransactions, TransactionType } from '@/lib/hooks/useTransactions';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { TransactionCardSkeleton } from '@/components/skeletons/TransactionCardSkeleton';
 import { getTransactionUrl } from '@/lib/config/env';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 export default function TransactionsPage() {
   const [isClient, setIsClient] = useState(false);
@@ -23,6 +25,7 @@ export default function TransactionsPage() {
     pageSize,
     filterType
   );
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Set up event listeners for real-time updates
   useContractEvents(address);
@@ -154,9 +157,14 @@ export default function TransactionsPage() {
             <h1 className="text-xl font-bold orbitron gradient-text">Transactions</h1>
             <p className="text-gray-400 text-xs">Transaction History</p>
           </div>
-          <div className="w-10 h-10"></div>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
+          </button>
         </div>
       </header>
+
+      {/* Sidebar */}
+      <Sidebar onClose={closeSidebar} />
 
       {/* Filter Section */}
       <section className="px-4 py-4">

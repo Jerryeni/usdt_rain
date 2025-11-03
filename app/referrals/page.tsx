@@ -7,12 +7,15 @@ import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useReferrals } from '@/lib/hooks/useReferrals';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { ReferralCardSkeleton } from '@/components/skeletons/ReferralCardSkeleton';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 export default function Referrals() {
   const [isClient, setIsClient] = useState(false);
   const { address } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: referralData, isLoading: loadingReferrals } = useReferrals(userInfo?.userId);
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Set up event listeners for real-time updates
   useContractEvents(address);
@@ -93,11 +96,14 @@ export default function Referrals() {
             <h1 className="text-xl font-bold orbitron gradient-text">My Referrals</h1>
             <p className="text-gray-400 text-xs">Team Management</p>
           </div>
-          <Link href="/share" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-share-alt text-cyan-400"></i>
-          </Link>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
+          </button>
         </div>
       </header>
+
+      {/* Sidebar */}
+      <Sidebar onClose={closeSidebar} />
 
       {/* Team Overview */}
       <section className="px-4 py-6">

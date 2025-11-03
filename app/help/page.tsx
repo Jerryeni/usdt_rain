@@ -3,11 +3,14 @@
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 function HelpPageContent() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const fromReward = searchParams?.get('from') === 'reward';
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   useEffect(() => {
     // Create animated rain effect
@@ -124,16 +127,21 @@ function HelpPageContent() {
       {/* Header */}
       <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-arrow-left text-cyan-400"></i>
-          </button>
+          <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-home text-cyan-400"></i>
+          </Link>
           <div className="text-center">
             <h1 className="text-xl font-bold orbitron gradient-text">Help & Support</h1>
             <p className="text-gray-400 text-xs">We're here to help</p>
           </div>
-          <div className="w-10 h-10"></div>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
+          </button>
         </div>
       </header>
+
+      {/* Sidebar */}
+      <Sidebar onClose={closeSidebar} />
 
       {/* Reward Claim Success Message */}
       {fromReward && (

@@ -111,8 +111,8 @@ try {
   const { ethers } = require('ethers');
   const iface = new ethers.Interface(USDTRainABI as any);
   console.log(`  Interface created: ✓`);
-  console.log(`  Functions in interface: ${iface.fragments.filter(f => f.type === 'function').length}`);
-  console.log(`  Events in interface: ${iface.fragments.filter(f => f.type === 'event').length}`);
+  console.log(`  Functions in interface: ${iface.fragments.filter((f: any) => f.type === 'function').length}`);
+  console.log(`  Events in interface: ${iface.fragments.filter((f: any) => f.type === 'event').length}`);
 } catch (error) {
   console.log(`  Error: ${(error as Error).message}`);
 }

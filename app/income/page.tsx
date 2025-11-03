@@ -17,6 +17,8 @@ import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton'
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import type { NonWorkingIncomeData } from '@/lib/hooks/useNonWorkingIncome';
 import { parseError } from '@/lib/utils/errorMessages';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 function MonthlyRewardsContent({ 
   nonWorkingIncome, 
@@ -148,6 +150,7 @@ export default function IncomeDetails() {
   const withdrawAll = useWithdrawAll();
   const claimNonWorking = useClaimNonWorking();
   const claimAchieverReward = useClaimAchieverReward();
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Transaction modal state
   const [txModalOpen, setTxModalOpen] = useState(false);
@@ -372,8 +375,8 @@ export default function IncomeDetails() {
             <h1 className="text-xl font-bold orbitron gradient-text">Income Details</h1>
             <p className="text-gray-400 text-xs">Level + Global Pool</p>
           </div>
-          <button className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-            <i className="fas fa-bell text-cyan-400"></i>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
           </button>
         </div>
       </header>
@@ -825,6 +828,8 @@ export default function IncomeDetails() {
           </Link>
         </div>
       </nav>
+
+      <Sidebar onClose={closeSidebar} />
     </div>
   );
 }

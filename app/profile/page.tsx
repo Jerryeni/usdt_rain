@@ -10,6 +10,8 @@ import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import { formatAddress } from '@/lib/config/env';
 import { parseError } from '@/lib/utils/errorMessages';
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
 
 export default function ProfilePage() {
   const [isClient, setIsClient] = useState(false);
@@ -24,6 +26,7 @@ export default function ProfilePage() {
   const { address, disconnect } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const updateProfile = useUpdateProfile();
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Transaction modal state
   const [txModalOpen, setTxModalOpen] = useState(false);
@@ -305,9 +308,14 @@ export default function ProfilePage() {
             <h1 className="text-xl font-bold orbitron gradient-text">Profile</h1>
             <p className="text-gray-400 text-xs">Account Settings</p>
           </div>
-          <div className="w-10 h-10"></div>
+          <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+            <i className="fas fa-bars text-cyan-400"></i>
+          </button>
         </div>
       </header>
+
+      {/* Sidebar */}
+      <Sidebar onClose={closeSidebar} />
 
       {/* Profile Header */}
       <section className="px-4 py-6">

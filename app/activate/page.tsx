@@ -9,6 +9,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUserInfo } from "@/lib/hooks/useUserInfo";
 import { Contract } from "ethers";
 import { ADDRESSES } from "@/lib/contracts/addresses";
+import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/lib/hooks/useSidebar';
+import Link from 'next/link';
 
 const USDT_ABI = [
   "function balanceOf(address owner) public view returns (uint256)",
@@ -25,7 +28,7 @@ export default function ActivatePage() {
   const rainIntervalRef = useRef<number | null>(null);
   const removeTimeoutsRef = useRef<number[]>([]);
   const [decimals, setDecimals] = useState<number>(18);
-
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   const activateMutation = useActivateAccount();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address || undefined);
@@ -182,15 +185,21 @@ export default function ActivatePage() {
         {/* Header */}
         <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
           <div className="flex items-center justify-between">
+            <Link href="/" className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+              <i className="fas fa-home text-cyan-400"></i>
+            </Link>
             <div className="text-center">
               <h1 className="text-xl font-bold orbitron gradient-text">Account Activation</h1>
               <p className="text-gray-400 text-xs">Activate with USDT deposit</p>
             </div>
-            <div className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
-              <i className="fas fa-coins text-cyan-400"></i>
-            </div>
+            <button onClick={toggleSidebar} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+              <i className="fas fa-bars text-cyan-400"></i>
+            </button>
           </div>
         </header>
+
+        {/* Sidebar */}
+        <Sidebar onClose={closeSidebar} />
 
         {/* Activation Interface */}
         <section className="px-4 py-6">
