@@ -51,50 +51,34 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <span className="text-white group-hover:text-cyan-400 transition-colors">Dashboard</span>
             </Link>
 
-            <Link
-              href="/income"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-chart-line text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Income</span>
-            </Link>
-
-            <Link
-              href="/referrals"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-users text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Team</span>
-            </Link>
-
-            <Link
-              href="/transactions"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-exchange-alt text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Transactions</span>
-            </Link>
-
-            <Link
-              href="/profile"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-user text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Profile</span>
-            </Link>
-
+           
             <Link
               href="/share"
               onClick={onClose}
               className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
             >
               <i className="fas fa-share-alt text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Share</span>
+              <span className="text-white group-hover:text-cyan-400 transition-colors">Share & Earn</span>
             </Link>
+
+            <Link
+              href="/leaderboard"
+              onClick={onClose}
+              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+            >
+              <i className="fas fa-question-circle text-cyan-400 w-5"></i>
+              <span className="text-white group-hover:text-cyan-400 transition-colors">Leaderboard</span>
+            </Link>
+
+             <Link
+              href="/settings"
+              onClick={onClose}
+              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+            >
+              <i className="fas fa-question-circle text-cyan-400 w-5"></i>
+              <span className="text-white group-hover:text-cyan-400 transition-colors">Settings</span>
+            </Link>
+
 
             <Link
               href="/help"
@@ -102,8 +86,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
               className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
             >
               <i className="fas fa-question-circle text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Help</span>
+              <span className="text-white group-hover:text-cyan-400 transition-colors">Help & Support</span>
             </Link>
+
+            
 
             <button
               onClick={handleDisconnect}
