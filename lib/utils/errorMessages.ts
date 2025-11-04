@@ -98,6 +98,39 @@ export function parseError(error: unknown): ParsedError {
     };
   }
 
+  // Custom contract errors (by error signature)
+  if (errorMessage.includes('0x118cdaa7') || errorString.includes('ownableunauthorizedaccount')) {
+    return {
+      title: 'Unauthorized',
+      message: 'Only the contract owner can perform this action.',
+      action: 'Please use the owner wallet or contact the administrator.',
+    };
+  }
+
+  if (errorMessage.includes('0xd93c0665') || errorString.includes('enforcedpause')) {
+    return {
+      title: 'Contract Paused',
+      message: 'The contract is currently paused.',
+      action: 'Please wait for the contract to be unpaused or contact support.',
+    };
+  }
+
+  if (errorMessage.includes('0x8dfc202b') || errorString.includes('expectedpause')) {
+    return {
+      title: 'Contract Not Paused',
+      message: 'This action requires the contract to be paused first.',
+      action: 'Please pause the contract before performing this action.',
+    };
+  }
+
+  if (errorMessage.includes('0xab143c06') || errorString.includes('reentrancyguard')) {
+    return {
+      title: 'Transaction In Progress',
+      message: 'Another transaction is currently being processed.',
+      action: 'Please wait for the current transaction to complete.',
+    };
+  }
+
   // Contract-specific errors
   if (errorString.includes('already registered')) {
     return {

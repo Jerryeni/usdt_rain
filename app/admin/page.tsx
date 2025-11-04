@@ -11,6 +11,7 @@ import { usePendingAchieverRewards } from '@/lib/hooks/usePendingAchieverRewards
 import { useMarkAchieverReward } from '@/lib/hooks/useMarkAchieverReward';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import { AdminAccessDebug } from '@/components/AdminAccessDebug';
+import { parseError } from '@/lib/utils/errorMessages';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -93,20 +94,11 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error(`${title} failed:`, error);
 
-      let errorMessage = 'Transaction failed';
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.reason) {
-          errorMessage = err.reason;
-        } else if (err.message) {
-          const match = err.message.match(/reason="([^"]+)"/);
-          if (match) {
-            errorMessage = match[1];
-          } else {
-            errorMessage = err.message;
-          }
-        }
-      }
+      // Use the error parsing utility for user-friendly messages
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
 
       setTxError(errorMessage);
       setTxStatus('failed');

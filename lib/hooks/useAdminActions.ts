@@ -41,7 +41,27 @@ export function useAdminActions() {
   const distributeGlobalPool = useMutation({
     mutationFn: async () => {
       if (!signer) throw new Error('Wallet not connected');
+      
       const contract = getWriteContract(signer);
+      
+      // Try to estimate gas first to catch errors early
+      try {
+        await contract.distributeGlobalPool.estimateGas();
+      } catch (error: any) {
+        // Parse common errors
+        if (error.data?.includes('0x118cdaa7')) {
+          throw new Error('Only the contract owner can distribute the global pool');
+        }
+        if (error.message?.includes('EnforcedPause')) {
+          throw new Error('Contract is paused. Unpause it first before distributing');
+        }
+        if (error.message?.includes('insufficient funds')) {
+          throw new Error('Insufficient funds in global pool to distribute');
+        }
+        // Re-throw with original message if we can't parse it
+        throw error;
+      }
+      
       const tx = await contract.distributeGlobalPool();
       const receipt = await tx.wait();
       return { transactionHash: receipt.hash };
