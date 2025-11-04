@@ -38,8 +38,6 @@ console.log('\n✓ Test 4: Profile Functions');
 const findFunction = (name: string) => {
   if (Array.isArray(USDTRainABI)) {
     return USDTRainABI.find((item: any) => item.type === 'function' && item.name === name);
-  } else if ('functions' in USDTRainABI && Array.isArray(USDTRainABI.functions)) {
-    return USDTRainABI.functions.find((item: any) => item.name === name);
   }
   return null;
 };
@@ -64,8 +62,6 @@ console.log('\n✓ Test 5: Events');
 const findEvent = (name: string) => {
   if (Array.isArray(USDTRainABI)) {
     return USDTRainABI.find((item: any) => item.type === 'event' && item.name === name);
-  } else if ('events' in USDTRainABI && Array.isArray(USDTRainABI.events)) {
-    return USDTRainABI.events.find((item: any) => item.name === name);
   }
   return null;
 };
@@ -92,13 +88,6 @@ if (Array.isArray(USDTRainABI)) {
   for (const item of USDTRainABI) {
     if (item.type === 'function') functionCount++;
     if (item.type === 'event') eventCount++;
-  }
-} else {
-  if ('functions' in USDTRainABI && Array.isArray(USDTRainABI.functions)) {
-    functionCount = USDTRainABI.functions.length;
-  }
-  if ('events' in USDTRainABI && Array.isArray(USDTRainABI.events)) {
-    eventCount = USDTRainABI.events.length;
   }
 }
 
