@@ -385,7 +385,7 @@ export default function IncomeDetails() {
                     Total Earned
                   </div>
                   <div className="text-3xl font-bold text-white counter-animation orbitron">
-                    ${formatUsd(userInfo?.totalEarned)}
+                    {formatUsd(userInfo?.totalEarned)}
                   </div>
                   <div className="text-xs text-gray-400 mt-2">All time earnings</div>
                 </div>
@@ -395,7 +395,7 @@ export default function IncomeDetails() {
                     Total Claimed
                   </div>
                   <div className="text-3xl font-bold text-green-400 counter-animation orbitron">
-                    ${formatUsd(userInfo?.totalWithdrawn)}
+                    {formatUsd(userInfo?.totalWithdrawn)}
                   </div>
                   <div className="text-xs text-gray-400 mt-2">Successfully withdrawn</div>
                 </div>
