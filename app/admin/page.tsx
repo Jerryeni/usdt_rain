@@ -7,6 +7,8 @@ import { useWallet } from '@/lib/wallet';
 import { useIsOwner } from '@/lib/hooks/useIsOwner';
 import { useAdminSummary } from '@/lib/hooks/useAdminSummary';
 import { useAdminActions } from '@/lib/hooks/useAdminActions';
+import { usePendingAchieverRewards } from '@/lib/hooks/usePendingAchieverRewards';
+import { useMarkAchieverReward } from '@/lib/hooks/useMarkAchieverReward';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import { AdminAccessDebug } from '@/components/AdminAccessDebug';
 
@@ -16,7 +18,9 @@ export default function AdminDashboard() {
   const { data: isOwner, isLoading: isCheckingOwner } = useIsOwner();
   const isConnected = !!address;
   const { data: adminSummary, isLoading } = useAdminSummary();
+  const { data: pendingRewards, isLoading: loadingPendingRewards } = usePendingAchieverRewards();
   const adminActions = useAdminActions();
+  const markAchieverReward = useMarkAchieverReward();
 
   // Transaction modal state
   const [txModalOpen, setTxModalOpen] = useState(false);
@@ -195,6 +199,17 @@ export default function AdminDashboard() {
     setNewOwnerAddress('');
   };
 
+  const handleMarkAchieverReward = async (userId: number, level: number, userName: string) => {
+    if (!confirm(`Approve Level ${level} Achiever Reward for ${userName} (User ID: ${userId})?`)) {
+      return;
+    }
+
+    handleAdminAction(
+      () => markAchieverReward.mutateAsync({ userId, level }),
+      `Mark Achiever Reward - Level ${level}`
+    );
+  };
+
   const closeTxModal = () => {
     setTxModalOpen(false);
     setTxStatus('idle');
@@ -333,6 +348,91 @@ export default function AdminDashboard() {
               <div className="text-xs text-white font-semibold">Dashboard</div>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Pending Achiever Rewards */}
+      <section className="px-4 mb-6">
+        <div className="slide-in">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+            <i className="fas fa-award text-pink-400 mr-2"></i>
+            Pending Achiever Rewards
+            {pendingRewards && pendingRewards.length > 0 && (
+              <span className="ml-2 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                {pendingRewards.length}
+              </span>
+            )}
+          </h2>
+          {loadingPendingRewards ? (
+            <div className="glass-card rounded-2xl p-6 animate-pulse">
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-20 bg-gray-700/50 rounded-xl"></div>
+                ))}
+              </div>
+            </div>
+          ) : pendingRewards && pendingRewards.length > 0 ? (
+            <div className="glass-card rounded-2xl p-4">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {pendingRewards.map((reward) => (
+                  <div
+                    key={`${reward.userId}-${reward.level}`}
+                    className="bg-gradient-to-br from-pink-500/10 to-purple-500/10 border border-pink-400/20 rounded-xl p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center mb-2">
+                          <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center mr-3">
+                            <span className="text-sm font-bold text-pink-400">{reward.level}</span>
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">{reward.userName}</h3>
+                            <p className="text-xs text-gray-400">User ID: {reward.userId}</p>
+                          </div>
+                        </div>
+                        <div className="ml-11">
+                          <p className="text-sm text-gray-300 mb-1">
+                            Level {reward.level} Achiever Reward
+                          </p>
+                          <div className="flex items-center text-xs text-gray-400">
+                            <i className="fas fa-check-circle text-green-400 mr-1"></i>
+                            <span>
+                              {reward.currentCount} / {reward.requirement} requirement met
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleMarkAchieverReward(reward.userId, reward.level, reward.userName)}
+                      disabled={markAchieverReward.isPending}
+                      className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    >
+                      {markAchieverReward.isPending ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin mr-2"></i>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-check mr-2"></i>
+                          Approve Level {reward.level} Reward
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="glass-card rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
+                <i className="fas fa-check-circle text-3xl text-pink-400"></i>
+              </div>
+              <h3 className="text-white font-semibold mb-2">All Caught Up!</h3>
+              <p className="text-gray-400 text-sm">No pending achiever reward approvals at this time</p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,20 +1,12 @@
 import { ethers } from 'ethers';
-import USDTRainABIRaw from './abi/USDTRain.json';
+import USDTRainABI from './abi/USDTRain.json';
 
 import { ADDRESSES } from './addresses';
 
 // Contract address from centralized configuration
 export const USDTRAIN_CONTRACT_ADDRESS = ADDRESSES.USDTRAIN;
 
-// Flatten ABI to array format for ethers.js compatibility
-// The ABI file is structured as an object with constructor, errors, events, and functions
-// ethers.js expects a flat array of all ABI items
-const USDTRainABI = [
-  ...(USDTRainABIRaw.constructor ? [USDTRainABIRaw.constructor] : []),
-  ...(USDTRainABIRaw.errors || []),
-  ...(USDTRainABIRaw.events || []),
-  ...(USDTRainABIRaw.functions || []),
-];
+// The ABI is already in the correct array format for ethers.js
 
 /**
  * Get a read-only contract instance for view functions

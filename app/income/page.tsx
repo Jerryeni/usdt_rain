@@ -10,7 +10,6 @@ import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
 import { useAchieverRewards } from '@/lib/hooks/useAchieverRewards';
 import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
 import { useCountdown } from '@/lib/hooks/useCountdown';
-import { useClaimAchieverReward } from '@/lib/hooks/useClaimAchieverReward';
 import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
@@ -149,7 +148,6 @@ export default function IncomeDetails() {
   const withdrawLevel = useWithdrawLevel();
   const withdrawAll = useWithdrawAll();
   const claimNonWorking = useClaimNonWorking();
-  const claimAchieverReward = useClaimAchieverReward();
   const { toggleSidebar, closeSidebar } = useSidebar();
 
   // Transaction modal state
@@ -254,40 +252,6 @@ export default function IncomeDetails() {
     } catch (error) {
       console.error(`Claim level ${level} failed:`, error);
       setTxError((error as Error).message);
-      setTxStatus('failed');
-    }
-  };
-
-  const handleClaimAchieverReward = async (userId: bigint, level: number) => {
-    setTxModalOpen(true);
-    setTxStatus('estimating');
-    setTxHash(undefined);
-    setTxError(undefined);
-
-    try {
-      setTxStatus('signing');
-      const result = await claimAchieverReward.mutateAsync({ userId, level });
-
-      setTxHash(result.transactionHash);
-      setTxStatus('pending');
-
-      setTimeout(() => {
-        setTxStatus('confirmed');
-        
-        // Redirect to help page after 2 seconds to show success message
-        setTimeout(() => {
-          router.push('/help?from=reward');
-        }, 2000);
-      }, 2000);
-    } catch (error) {
-      console.error('Claim achiever reward failed:', error);
-      
-      const parsedError = parseError(error);
-      const errorMessage = parsedError.action 
-        ? `${parsedError.message} ${parsedError.action}`
-        : parsedError.message;
-      
-      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
@@ -708,31 +672,13 @@ export default function IncomeDetails() {
                             <i className="fas fa-headset mr-2"></i>
                             Contact Admin for Approval
                           </Link>
-                        ) : levelDetail.rewardStatus === 'claimed' ? (
+                        ) : (
                           <button
                             disabled
                             className="w-full bg-green-500/20 text-green-400 font-semibold py-2 px-4 rounded-lg cursor-default text-sm border border-green-400/30"
                           >
                             <i className="fas fa-check-circle mr-2"></i>
-                            Reward Claimed
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => userInfo && handleClaimAchieverReward(BigInt(userInfo.userId), levelDetail.level)}
-                            disabled={claimAchieverReward.isPending}
-                            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                          >
-                            {claimAchieverReward.isPending ? (
-                              <>
-                                <i className="fas fa-spinner fa-spin mr-2"></i>
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                <i className="fas fa-gift mr-2"></i>
-                                Claim Level {levelDetail.level} Reward
-                              </>
-                            )}
+                            Reward Received
                           </button>
                         )}
                       </div>

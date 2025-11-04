@@ -80,13 +80,7 @@ export function useAchieverRewards(userAddress?: string | null) {
             
             const meetsRequirement = count >= requirement;
             
-            let isMarkedByAdmin = false;
-            try {
-              isMarkedByAdmin = await contract.hasUserAchievedLevel(userAddress, BigInt(level));
-            } catch (error) {
-              console.warn(`Error checking admin mark for level ${level}:`, error);
-            }
-            
+            // Check if admin has rewarded this level (automatically rewards when marked)
             let isRewarded = false;
             try {
               isRewarded = await contract.isAchieverRewarded(userId, BigInt(level));
@@ -97,17 +91,14 @@ export function useAchieverRewards(userAddress?: string | null) {
             let rewardStatus: 'not-eligible' | 'pending-admin' | 'unclaimed' | 'claimed';
             let needsAdminApproval = false;
             let canClaim = false;
+            let isMarkedByAdmin = isRewarded;
             
             if (!meetsRequirement) {
               // User hasn't met the level count requirement yet
               rewardStatus = 'not-eligible';
             } else if (isRewarded) {
-              // User has already claimed the reward
+              // Admin has marked and automatically rewarded the user
               rewardStatus = 'claimed';
-            } else if (isMarkedByAdmin) {
-              // Admin has marked, user can now claim
-              rewardStatus = 'unclaimed';
-              canClaim = true;
             } else {
               // User meets requirement but admin hasn't marked yet - contact admin
               rewardStatus = 'pending-admin';
