@@ -61,21 +61,25 @@ export function useAchieverRewards(userAddress?: string | null) {
           requirementsArray.map(async (requirement: number, index: number) => {
             const level = index + 1;
             
+            // Each achiever level corresponds directly to the network level count
+            // Achiever Level 1 = Direct referrals (not in levelCountsArray)
+            // Achiever Level 2 = Users at Network Level 2 (levelCountsArray[1])
+            // Achiever Level 3 = Users at Network Level 3 (levelCountsArray[2])
+            // And so on...
+            
             let count = 0;
             let description = '';
             
             if (level === 1) {
-              // Level 1 requires direct referrals
+              // Achiever Level 1 requires direct referrals
               count = directReferrals;
               description = `Requires ${requirement} direct referrals`;
             } else {
-              // Level 2+ requires users at the previous network level
-              // levelCountsArray[0] = Level 1 users, levelCountsArray[1] = Level 2 users, etc.
-              // For Achiever Level 2, we need Level 1 users (index 0)
-              // For Achiever Level 3, we need Level 2 users (index 1), etc.
-              const networkLevelIndex = level - 2;
+              // Achiever Level X requires users at Network Level X
+              // levelCountsArray[0] = Network Level 1, levelCountsArray[1] = Network Level 2, etc.
+              const networkLevelIndex = level - 1;
               count = levelCountsArray[networkLevelIndex] || 0;
-              description = `Requires ${requirement} users at Network Level ${level - 1}`;
+              description = `Requires ${requirement} users at Network Level ${level}`;
             }
             
             const meetsRequirement = count >= requirement;

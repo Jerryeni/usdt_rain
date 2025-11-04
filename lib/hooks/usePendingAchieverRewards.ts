@@ -58,12 +58,16 @@ export function usePendingAchieverRewards() {
             for (let level = 1; level <= requirementsArray.length; level++) {
               const requirement = requirementsArray[level - 1];
               
-              // Determine current count based on level
+              // Each achiever level corresponds directly to the network level count
+              // Achiever Level 1 = Direct referrals
+              // Achiever Level 2 = Users at Network Level 2 (levelCountsArray[1])
+              // Achiever Level 3 = Users at Network Level 3 (levelCountsArray[2])
+              // And so on...
               let currentCount = 0;
               if (level === 1) {
                 currentCount = directReferrals;
               } else {
-                const networkLevelIndex = level - 2;
+                const networkLevelIndex = level - 1;
                 currentCount = levelCountsArray[networkLevelIndex] || 0;
               }
               
