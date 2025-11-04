@@ -3,16 +3,16 @@ import { getWriteContract } from '../contracts/USDTRain';
 import { useWallet } from '../wallet';
 
 export function useMarkAchieverReward() {
-  const { provider } = useWallet();
+  const { signer } = useWallet();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ userId, level }: { userId: number; level: number }) => {
-      if (!provider) {
+      if (!signer) {
         throw new Error('Wallet not connected');
       }
 
-      const contract = getWriteContract(provider);
+      const contract = getWriteContract(signer);
       const tx = await contract.markAchieverReward(BigInt(userId), BigInt(level));
       const receipt = await tx.wait();
 
