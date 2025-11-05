@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getWriteContract } from '../contracts/USDTRain';
 import { useWallet } from '../wallet';
 import { useToast } from '@/components/ui/use-toast';
+import { parseError } from '../utils/errorMessages';
 
 export interface ProfileData {
   userName: string;
@@ -135,29 +136,12 @@ export function useUpdateProfile() {
     onError: (error: unknown) => {
       console.error('Profile update error:', error);
       
-      // Parse error message
-      const errorMessage = (error as Error)?.message || String(error);
-      let userMessage = 'Profile Update Failed';
-      let description = errorMessage;
-
-      // Handle common errors
-      if (errorMessage.includes('user rejected')) {
-        userMessage = 'Transaction Cancelled';
-        description = 'You cancelled the profile update in your wallet.';
-      } else if (errorMessage.includes('insufficient funds')) {
-        userMessage = 'Insufficient Balance';
-        description = 'You don\'t have enough BNB to pay for gas fees.';
-      } else if (errorMessage.includes('User not registered')) {
-        userMessage = 'Not Registered';
-        description = 'Please register before updating your profile.';
-      } else if (errorMessage.includes('required') || errorMessage.includes('invalid')) {
-        userMessage = 'Validation Error';
-        // description already contains the validation error
-      }
+      // Use the error parsing utility for user-friendly messages
+      const parsedError = parseError(error);
 
       toast({
-        title: userMessage,
-        description,
+        title: parsedError.title,
+        description: parsedError.action ? `${parsedError.message} ${parsedError.action}` : parsedError.message,
         variant: 'destructive',
       });
     },

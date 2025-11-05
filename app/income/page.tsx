@@ -221,7 +221,13 @@ export default function IncomeDetails() {
       }, 2000);
     } catch (error) {
       console.error('Claim all failed:', error);
-      setTxError((error as Error).message);
+      
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
+      
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
@@ -251,7 +257,13 @@ export default function IncomeDetails() {
       }, 2000);
     } catch (error) {
       console.error(`Claim level ${level} failed:`, error);
-      setTxError((error as Error).message);
+      
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
+      
+      setTxError(errorMessage);
       setTxStatus('failed');
     }
   };
