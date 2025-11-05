@@ -121,6 +121,7 @@ export function useWithdraw() {
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({ queryKey: ['usdtrain', 'userInfo'] });
       queryClient.invalidateQueries({ queryKey: ['usdtrain', 'levelIncome'] });
+      queryClient.invalidateQueries({ queryKey: ['usdtrain', 'nonWorkingIncome'] });
       queryClient.invalidateQueries({ queryKey: ['usdtrain', 'transactions'] });
       
       // Show success toast
