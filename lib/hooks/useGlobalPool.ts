@@ -50,6 +50,25 @@ export function useGlobalPool(userAddress?: string | null) {
         let needsAdminApproval = false;
         let hasReceivedReward = false;
 
+        // Fetch eligible users list and count from contract
+        console.log('🔍 Fetching eligible users from contract...');
+        try {
+          eligibleUsers = await contract.getEligibleUsers();
+          console.log('✅ Fetched eligible users array:', eligibleUsers);
+          
+          // IMPORTANT: Always use array length, NOT eligibleUserCount()
+          // The contract's eligibleUserCount() function is not being updated correctly
+          // It returns 0 even when there are users in the array
+          eligibleUsersCount = eligibleUsers.length;
+          console.log('📊 Using array length as count:', eligibleUsersCount);
+          
+        } catch (error) {
+          console.error('❌ Could not fetch eligible users list:', error);
+        }
+        
+        console.log('📈 Final eligibleUsersCount:', eligibleUsersCount);
+        console.log('📋 Final eligibleUsers array:', eligibleUsers);
+
         if (userAddress) {
           try {
             const userInfo = await contract.getUserInfo(userAddress);
@@ -57,15 +76,9 @@ export function useGlobalPool(userAddress?: string | null) {
             const isActive = userInfo[5]; // isActive
             
             // Check if user is in the eligible users list (admin-approved)
-            try {
-              eligibleUsers = await contract.getEligibleUsers();
-              userInEligibleList = eligibleUsers.some(
-                (addr: string) => addr.toLowerCase() === userAddress.toLowerCase()
-              );
-              eligibleUsersCount = eligibleUsers.length;
-            } catch (error) {
-              console.warn('Could not fetch eligible users list:', error);
-            }
+            userInEligibleList = eligibleUsers.some(
+              (addr: string) => addr.toLowerCase() === userAddress.toLowerCase()
+            );
 
             // User is eligible if they are active AND in the eligible list
             userEligible = isActive && userInEligibleList;
@@ -104,7 +117,7 @@ export function useGlobalPool(userAddress?: string | null) {
           }
         }
 
-        return {
+        const result = {
           balance,
           balanceUSD: (Number(balance) / 1e18).toFixed(2),
           percentage,
@@ -119,13 +132,22 @@ export function useGlobalPool(userAddress?: string | null) {
           needsAdminApproval,
           hasReceivedReward,
         };
+        
+        console.log('🎯 Returning GlobalPoolData:', {
+          eligibleUsersCount: result.eligibleUsersCount,
+          eligibleUsersLength: result.eligibleUsers.length,
+        });
+        
+        return result;
       } catch (error) {
         console.error('Error fetching global pool data:', error);
         return null;
       }
     },
     enabled: !!provider,
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 10000, // 10 seconds - shorter to see updates faster
+    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }

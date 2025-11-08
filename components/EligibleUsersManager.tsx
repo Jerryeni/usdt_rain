@@ -6,12 +6,37 @@ import { useAdminActions } from '@/lib/hooks/useAdminActions';
 import { useToast } from '@/components/ui/use-toast';
 
 export function EligibleUsersManager() {
-  const { data: globalPool } = useGlobalPool();
+  const { data: globalPool, refetch, isLoading } = useGlobalPool();
   const { addEligibleUser, removeEligibleUser } = useAdminActions();
   const { toast } = useToast();
   const [newUserAddress, setNewUserAddress] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [removingAddress, setRemovingAddress] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Debug logging
+  console.log('🎨 EligibleUsersManager render:', {
+    isLoading,
+    globalPool,
+    eligibleUsersCount: globalPool?.eligibleUsersCount,
+    eligibleUsersLength: globalPool?.eligibleUsers?.length,
+  });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast({
+        title: 'Refreshed',
+        description: 'Eligible users list has been refreshed',
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to refresh:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleAddUser = async () => {
     if (!newUserAddress) return;
@@ -25,6 +50,8 @@ export function EligibleUsersManager() {
         description: `${newUserAddress} has been added to the eligible list`,
         variant: 'success',
       });
+      // Refresh the data after adding
+      setTimeout(() => refetch(), 2000);
     } catch (error: any) {
       console.error('Failed to add user:', error);
       toast({
@@ -48,6 +75,8 @@ export function EligibleUsersManager() {
         description: `${address} has been removed from the eligible list`,
         variant: 'success',
       });
+      // Refresh the data after removing
+      setTimeout(() => refetch(), 2000);
     } catch (error: any) {
       console.error('Failed to remove user:', error);
       toast({
@@ -62,11 +91,25 @@ export function EligibleUsersManager() {
 
   return (
     <div className="glass-card rounded-2xl p-6">
-      <div className="mb-6">
-        <div className="text-sm text-gray-400 mb-2">Eligible Users Count</div>
-        <div className="text-3xl font-bold text-cyan-400 orbitron">
-          {globalPool?.eligibleUsersCount || 0}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <div className="text-sm text-gray-400 mb-2">Eligible Users Count</div>
+          <div className="text-3xl font-bold text-cyan-400 orbitron">
+            {isLoading ? (
+              <i className="fas fa-spinner fa-spin text-2xl"></i>
+            ) : (
+              globalPool?.eligibleUsersCount || 0
+            )}
+          </div>
         </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+          title="Refresh eligible users list"
+        >
+          <i className={`fas fa-sync-alt ${isRefreshing ? 'fa-spin' : ''}`}></i>
+        </button>
       </div>
 
       {/* Add User Form */}
