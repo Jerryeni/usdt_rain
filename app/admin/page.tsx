@@ -12,6 +12,10 @@ import { useMarkAchieverReward } from '@/lib/hooks/useMarkAchieverReward';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
 import { AdminAccessDebug } from '@/components/AdminAccessDebug';
 import { parseError } from '@/lib/utils/errorMessages';
+import { EligibleUsersManager } from '@/components/EligibleUsersManager';
+import { BatchDistribution } from '@/components/BatchDistribution';
+import { ManagerRoleManager } from '@/components/ManagerRoleManager';
+import { ContractConfigDisplay } from '@/components/ContractConfigDisplay';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -428,6 +432,39 @@ export default function AdminDashboard() {
         </div>
       </section>
 
+      {/* Manager Role Management */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.2s' }}>
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+            <i className="fas fa-user-shield text-purple-400 mr-2"></i>
+            Manager Role
+          </h2>
+          <ManagerRoleManager />
+        </div>
+      </section>
+
+      {/* Eligible Users Management */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.3s' }}>
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+            <i className="fas fa-users text-cyan-400 mr-2"></i>
+            Eligible Users Management
+          </h2>
+          <EligibleUsersManager />
+        </div>
+      </section>
+
+      {/* Batch Distribution */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.4s' }}>
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+            <i className="fas fa-share-alt text-blue-400 mr-2"></i>
+            Global Pool Distribution
+          </h2>
+          <BatchDistribution />
+        </div>
+      </section>
+
       {/* Contract Statistics */}
       <section className="px-4 mb-6">
         <div className="slide-in">
@@ -499,9 +536,20 @@ export default function AdminDashboard() {
         </div>
       </section>
 
+      {/* Contract Configuration */}
+      <section className="px-4 mb-6">
+        <div className="slide-in" style={{ animationDelay: '0.5s' }}>
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+            <i className="fas fa-cog text-cyan-400 mr-2"></i>
+            Contract Configuration
+          </h2>
+          <ContractConfigDisplay />
+        </div>
+      </section>
+
       {/* Contract Controls */}
       <section className="px-4 mb-6">
-        <div className="slide-in" style={{ animationDelay: '0.1s' }}>
+        <div className="slide-in" style={{ animationDelay: '0.6s' }}>
           <h2 className="text-lg font-bold text-white mb-4 flex items-center">
             <i className="fas fa-sliders-h text-cyan-400 mr-2"></i>
             Contract Controls

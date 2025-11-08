@@ -251,23 +251,23 @@ export default function TransactionsPage() {
                     </div>
 
                     <div className="pt-3 border-t border-gray-700/30 space-y-2">
-                      {tx.type === 'level_income' && (
-                        <div className="flex items-center text-xs">
-                          <span className="text-gray-400 mr-2">From:</span>
-                          {tx.sourceUserName || tx.sourceUserId ? (
+                      {tx.type === 'level_income' && tx.level && (
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center">
+                            <span className="text-gray-400 mr-2">From:</span>
                             <div className="flex items-center bg-cyan-500/10 px-2 py-1 rounded">
-                              <i className="fas fa-user text-cyan-400 mr-1"></i>
+                              <i className="fas fa-layer-group text-cyan-400 mr-1"></i>
                               <span className="text-cyan-400 font-medium">
-                                {tx.sourceUserName || `User #${tx.sourceUserId?.toString()}`}
+                                Network Level {tx.level}
                               </span>
-                              {tx.sourceUserId && tx.sourceUserName && (
-                                <span className="text-gray-400 ml-1">#{tx.sourceUserId.toString()}</span>
-                              )}
                             </div>
-                          ) : (
-                            <div className="flex items-center bg-gray-500/10 px-2 py-1 rounded">
-                              <i className="fas fa-user text-gray-400 mr-1"></i>
-                              <span className="text-gray-400 font-medium">Network Member</span>
+                          </div>
+                          {tx.userId && (
+                            <div className="flex items-center bg-blue-500/10 px-2 py-1 rounded">
+                              <i className="fas fa-hashtag text-blue-400 mr-1"></i>
+                              <span className="text-blue-400 font-mono font-semibold">
+                                Your ID: {tx.userId.toString()}
+                              </span>
                             </div>
                           )}
                         </div>

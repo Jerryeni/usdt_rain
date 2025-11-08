@@ -21,12 +21,10 @@ export interface Transaction {
   amount: bigint;
   amountUSD: string;
   level?: number;
+  sourceId?: bigint;
   timestamp: Date;
   txHash?: string;
   status: 'confirmed';
-  sourceUserId?: bigint;
-  sourceUserName?: string;
-  sourceUserAddress?: string;
 }
 
 export interface TransactionData {
@@ -102,22 +100,28 @@ export function useTransactions(
         const contract = getReadContract(provider);
 
         // Fetch all transactions for the user
-        const rawTransactions = await contract.getUserTransactions(userId);
+        const result = await contract.getUserTransactions(userId);
         
-        const transactionsPromises = rawTransactions.map(async (tx: any) => {
+        // The function now returns arrays: ids, addresses, types, amounts, levels, timestamps, sourceIds
+        const ids = result[0];
+        const addresses = result[1];
+        const types = result[2];
+        const amounts = result[3];
+        const levels = result[4];
+        const timestamps = result[5];
+        const sourceIds = result[6];
+        
+        const transactionsPromises = ids.map(async (_: any, index: number) => {
           let userName = '';
           let txUserId: bigint | undefined;
-          let sourceUserId: bigint | undefined;
-          let sourceUserName: string | undefined;
-          let sourceUserAddress: string | undefined;
           
           try {
-            txUserId = await contract.getUserIdByAddress(tx.userAddress);
+            txUserId = await contract.getUserIdByAddress(addresses[index]);
             
             if (txUserId && Number(txUserId) > 0) {
               try {
-                const profile = await contract.getUserProfile(tx.userAddress);
-                userName = profile.userName || '';
+                const userInfo = await contract.getUserInfo(addresses[index]);
+                userName = userInfo[9] || ''; // userName field
               } catch (e) {
                 // Profile might not be set
               }
@@ -126,42 +130,20 @@ export function useTransactions(
             // User might not be registered
           }
           
-          const txType = mapTransactionType(tx.transactionType);
-          
-          console.log('Transaction data:', {
-            id: tx.transactionId?.toString(),
-            type: tx.transactionType,
-            hasSourceUserId: !!tx.sourceUserId,
-            sourceUserId: tx.sourceUserId?.toString(),
-            level: tx.level?.toString(),
-          });
-          
-          if (tx.sourceUserId && Number(tx.sourceUserId) > 0) {
-            sourceUserId = tx.sourceUserId;
-            
-            try {
-              sourceUserAddress = await contract.getUserAddressById(sourceUserId);
-              const sourceProfile = await contract.getUserProfile(sourceUserAddress);
-              sourceUserName = sourceProfile.userName || undefined;
-            } catch (e) {
-              console.warn('Error fetching source user profile:', e);
-            }
-          }
+          const txType = mapTransactionType(types[index]);
           
           return {
-            transactionId: tx.transactionId,
-            userAddress: tx.userAddress,
+            transactionId: ids[index],
+            userAddress: addresses[index],
             userName: userName || undefined,
             userId: txUserId,
             type: txType,
-            amount: tx.amount,
-            amountUSD: formatToUSD(tx.amount),
-            level: tx.level && Number(tx.level) > 0 ? Number(tx.level) : undefined,
-            timestamp: new Date(Number(tx.timestamp) * 1000),
+            amount: amounts[index],
+            amountUSD: formatToUSD(amounts[index]),
+            level: levels[index] && Number(levels[index]) > 0 ? Number(levels[index]) : undefined,
+            sourceId: sourceIds[index] && Number(sourceIds[index]) > 0 ? sourceIds[index] : undefined,
+            timestamp: new Date(Number(timestamps[index]) * 1000),
             status: 'confirmed' as const,
-            sourceUserId,
-            sourceUserName,
-            sourceUserAddress,
           };
         });
         

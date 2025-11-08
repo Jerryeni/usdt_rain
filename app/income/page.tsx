@@ -514,7 +514,57 @@ export default function IncomeDetails() {
                   </div>
                 </div>
 
-                {!globalPool.userEligible && (
+                {/* User has received reward - show rewarded status */}
+                {globalPool.hasReceivedReward && globalPool.userInEligibleList && (
+                  <div className="mt-4 bg-green-500/10 border border-green-400/20 rounded-xl p-4">
+                    <div className="text-center">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <i className="fas fa-check-circle text-2xl text-green-400"></i>
+                      </div>
+                      <h3 className="text-green-400 font-semibold mb-1">Rewarded!</h3>
+                      <p className="text-sm text-gray-300">
+                        You've received ${globalPool.totalClaimedUSD} from the global pool
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* User is in eligible list but hasn't received reward yet */}
+                {!globalPool.hasReceivedReward && globalPool.userInEligibleList && (
+                  <div className="mt-4 bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-4">
+                    <div className="text-center">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                        <i className="fas fa-clock text-2xl text-cyan-400"></i>
+                      </div>
+                      <h3 className="text-cyan-400 font-semibold mb-1">Approved!</h3>
+                      <p className="text-sm text-gray-300">
+                        You're in the eligible list. Waiting for admin to distribute the global pool.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* User needs admin approval - show chat admin button */}
+                {globalPool.needsAdminApproval && !globalPool.userInEligibleList && (
+                  <div className="mt-4 space-y-3">
+                    <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
+                      <p className="text-sm text-blue-300 text-center mb-3">
+                        <i className="fas fa-info-circle mr-2"></i>
+                        You're eligible for global pool! Contact admin to get added to the distribution list.
+                      </p>
+                      <Link
+                        href="/help"
+                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
+                      >
+                        <i className="fas fa-headset mr-2"></i>
+                        Chat Admin for Approval
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                
+                {/* User not activated yet */}
+                {!globalPool.userEligible && !globalPool.needsAdminApproval && (
                   <div className="mt-4 bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
                     <p className="text-sm text-orange-300 text-center">
                       <i className="fas fa-info-circle mr-2"></i>

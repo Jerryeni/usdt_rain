@@ -141,6 +141,67 @@ export function useAdminActions() {
     onSuccess: invalidateQueries,
   });
 
+  // Mark achiever reward as distributed
+  const markAchieverReward = useMutation({
+    mutationFn: async ({ userId, level }: { userId: number; level: number }) => {
+      if (!signer) throw new Error('Wallet not connected');
+      const contract = getWriteContract(signer);
+      
+      // Validate inputs
+      if (userId <= 0) throw new Error('Invalid user ID');
+      if (level < 1 || level > 5) throw new Error('Level must be between 1 and 5');
+      
+      const tx = await contract.markAchieverReward(BigInt(userId), BigInt(level));
+      const receipt = await tx.wait();
+      return { transactionHash: receipt.hash };
+    },
+    onSuccess: invalidateQueries,
+  });
+
+  // Add eligible user for global pool
+  const addEligibleUser = useMutation({
+    mutationFn: async (userAddress: string) => {
+      if (!signer) throw new Error('Wallet not connected');
+      const contract = getWriteContract(signer);
+      
+      // Validate address
+      if (!userAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+        throw new Error('Invalid Ethereum address');
+      }
+      
+      const tx = await contract.addEligibleUser(userAddress);
+      const receipt = await tx.wait();
+      return { transactionHash: receipt.hash, userAddress };
+    },
+    onSuccess: invalidateQueries,
+  });
+
+  // Remove eligible user from global pool
+  const removeEligibleUser = useMutation({
+    mutationFn: async (userAddress: string) => {
+      if (!signer) throw new Error('Wallet not connected');
+      const contract = getWriteContract(signer);
+      
+      const tx = await contract.removeEligibleUser(userAddress);
+      const receipt = await tx.wait();
+      return { transactionHash: receipt.hash, userAddress };
+    },
+    onSuccess: invalidateQueries,
+  });
+
+  // Distribute global pool in batches
+  const distributeGlobalPoolBatch = useMutation({
+    mutationFn: async () => {
+      if (!signer) throw new Error('Wallet not connected');
+      const contract = getWriteContract(signer);
+      
+      const tx = await contract.distributeGlobalPoolBatch();
+      const receipt = await tx.wait();
+      return { transactionHash: receipt.hash };
+    },
+    onSuccess: invalidateQueries,
+  });
+
   return {
     pause,
     unpause,
@@ -150,5 +211,9 @@ export function useAdminActions() {
     updateDistributionPercentages,
     updateReserveWallet,
     transferOwnership,
+    markAchieverReward,
+    addEligibleUser,
+    removeEligibleUser,
+    distributeGlobalPoolBatch,
   };
 }
