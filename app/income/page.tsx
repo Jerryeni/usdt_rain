@@ -7,9 +7,9 @@ import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useLevelIncome } from '@/lib/hooks/useLevelIncome';
 import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
-import { useAchieverRewards } from '@/lib/hooks/useAchieverRewards';
-import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
-import { useCountdown } from '@/lib/hooks/useCountdown';
+// import { useAchieverRewards } from '@/lib/hooks/useAchieverRewards';
+// import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
+// import { useCountdown } from '@/lib/hooks/useCountdown';
 import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
@@ -19,122 +19,122 @@ import { parseError } from '@/lib/utils/errorMessages';
 import Sidebar from '@/components/Sidebar';
 import { useSidebar } from '@/lib/hooks/useSidebar';
 
-function MonthlyRewardsContent({ 
-  nonWorkingIncome, 
-  claimNonWorking, 
-  handleClaimNonWorking 
-}: { 
-  nonWorkingIncome: NonWorkingIncomeData;
-  claimNonWorking: any;
-  handleClaimNonWorking: () => void;
-}) {
-  const countdown = useCountdown(Number(nonWorkingIncome.nextClaimTime));
+// function MonthlyRewardsContent({ 
+//   nonWorkingIncome, 
+//   claimNonWorking, 
+//   handleClaimNonWorking 
+// }: { 
+//   nonWorkingIncome: NonWorkingIncomeData;
+//   claimNonWorking: any;
+//   handleClaimNonWorking: () => void;
+// }) {
+//   const countdown = useCountdown(Number(nonWorkingIncome.nextClaimTime));
 
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
-          <div className="text-sm text-gray-400 mb-1">Total Claimed</div>
-          <div className="text-2xl font-bold text-green-400 orbitron">
-            ${nonWorkingIncome.totalClaimedUSD}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">All time</div>
-        </div>
+//   return (
+//     <>
+//       <div className="grid grid-cols-2 gap-4 mb-6">
+//         <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
+//           <div className="text-sm text-gray-400 mb-1">Total Claimed</div>
+//           <div className="text-2xl font-bold text-green-400 orbitron">
+//             ${nonWorkingIncome.totalClaimedUSD}
+//           </div>
+//           <div className="text-xs text-gray-400 mt-1">All time</div>
+//         </div>
 
-        <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
-          <div className="text-sm text-gray-400 mb-1">Last Claim</div>
-          <div className="text-lg font-bold text-green-400 orbitron">
-            {Number(nonWorkingIncome.lastClaimTime) > 0
-              ? new Date(Number(nonWorkingIncome.lastClaimTime) * 1000).toLocaleDateString()
-              : 'Never'}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">Date</div>
-        </div>
-      </div>
+//         <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
+//           <div className="text-sm text-gray-400 mb-1">Last Claim</div>
+//           <div className="text-lg font-bold text-green-400 orbitron">
+//             {Number(nonWorkingIncome.lastClaimTime) > 0
+//               ? new Date(Number(nonWorkingIncome.lastClaimTime) * 1000).toLocaleDateString()
+//               : 'Never'}
+//           </div>
+//           <div className="text-xs text-gray-400 mt-1">Date</div>
+//         </div>
+//       </div>
 
-      {nonWorkingIncome.hasDirectReferrals ? (
-        <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-4 text-center">
-          <div className="text-sm text-orange-300 mb-2">
-            <i className="fas fa-info-circle mr-2"></i>
-            Not Eligible for Non-Working Rewards
-          </div>
-          <div className="text-sm text-gray-400 mt-2">
-            Non-working rewards are only available for users without direct referrals. Since you have an active team, you earn through Level Income and Global Pool instead!
-          </div>
-        </div>
-      ) : nonWorkingIncome.canClaim ? (
-        <button
-          onClick={handleClaimNonWorking}
-          disabled={claimNonWorking.isPending}
-          className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed orbitron"
-        >
-          {claimNonWorking.isPending ? (
-            <>
-              <i className="fas fa-spinner fa-spin mr-2"></i>
-              Processing...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-gift mr-2"></i>
-              Claim Non-Working Reward
-            </>
-          )}
-        </button>
-      ) : (
-        <div className="space-y-4">
-          {/* Countdown Display */}
-          {!countdown.isExpired && Number(nonWorkingIncome.nextClaimTime) > 0 && (
-            <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl p-6 text-center">
-              <div className="text-sm text-gray-400 mb-3">
-                <i className="fas fa-hourglass-half mr-2"></i>
-                Time Until Next Claim
-              </div>
-              <div className="text-4xl font-bold text-green-400 orbitron mb-2">
-                {countdown.formatted}
-              </div>
-              <div className="grid grid-cols-4 gap-2 mt-4">
-                {countdown.days > 0 && (
-                  <div className="bg-green-500/20 rounded-lg p-2">
-                    <div className="text-2xl font-bold text-green-400">{countdown.days}</div>
-                    <div className="text-xs text-gray-400">Days</div>
-                  </div>
-                )}
-                <div className="bg-green-500/20 rounded-lg p-2">
-                  <div className="text-2xl font-bold text-green-400">{countdown.hours}</div>
-                  <div className="text-xs text-gray-400">Hours</div>
-                </div>
-                <div className="bg-green-500/20 rounded-lg p-2">
-                  <div className="text-2xl font-bold text-green-400">{countdown.minutes}</div>
-                  <div className="text-xs text-gray-400">Minutes</div>
-                </div>
-                <div className="bg-green-500/20 rounded-lg p-2">
-                  <div className="text-2xl font-bold text-green-400">{countdown.seconds}</div>
-                  <div className="text-xs text-gray-400">Seconds</div>
-                </div>
-              </div>
-            </div>
-          )}
+//       {nonWorkingIncome.hasDirectReferrals ? (
+//         <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-4 text-center">
+//           <div className="text-sm text-orange-300 mb-2">
+//             <i className="fas fa-info-circle mr-2"></i>
+//             Not Eligible for Non-Working Rewards
+//           </div>
+//           <div className="text-sm text-gray-400 mt-2">
+//             Non-working rewards are only available for users without direct referrals. Since you have an active team, you earn through Level Income and Global Pool instead!
+//           </div>
+//         </div>
+//       ) : nonWorkingIncome.canClaim ? (
+//         <button
+//           onClick={handleClaimNonWorking}
+//           disabled={claimNonWorking.isPending}
+//           className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed orbitron"
+//         >
+//           {claimNonWorking.isPending ? (
+//             <>
+//               <i className="fas fa-spinner fa-spin mr-2"></i>
+//               Processing...
+//             </>
+//           ) : (
+//             <>
+//               <i className="fas fa-gift mr-2"></i>
+//               Claim Non-Working Reward
+//             </>
+//           )}
+//         </button>
+//       ) : (
+//         <div className="space-y-4">
+//           {/* Countdown Display */}
+//           {!countdown.isExpired && Number(nonWorkingIncome.nextClaimTime) > 0 && (
+//             <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl p-6 text-center">
+//               <div className="text-sm text-gray-400 mb-3">
+//                 <i className="fas fa-hourglass-half mr-2"></i>
+//                 Time Until Next Claim
+//               </div>
+//               <div className="text-4xl font-bold text-green-400 orbitron mb-2">
+//                 {countdown.formatted}
+//               </div>
+//               <div className="grid grid-cols-4 gap-2 mt-4">
+//                 {countdown.days > 0 && (
+//                   <div className="bg-green-500/20 rounded-lg p-2">
+//                     <div className="text-2xl font-bold text-green-400">{countdown.days}</div>
+//                     <div className="text-xs text-gray-400">Days</div>
+//                   </div>
+//                 )}
+//                 <div className="bg-green-500/20 rounded-lg p-2">
+//                   <div className="text-2xl font-bold text-green-400">{countdown.hours}</div>
+//                   <div className="text-xs text-gray-400">Hours</div>
+//                 </div>
+//                 <div className="bg-green-500/20 rounded-lg p-2">
+//                   <div className="text-2xl font-bold text-green-400">{countdown.minutes}</div>
+//                   <div className="text-xs text-gray-400">Minutes</div>
+//                 </div>
+//                 <div className="bg-green-500/20 rounded-lg p-2">
+//                   <div className="text-2xl font-bold text-green-400">{countdown.seconds}</div>
+//                   <div className="text-xs text-gray-400">Seconds</div>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
 
-          {/* Disabled Claim Button */}
-          <button
-            disabled
-            className="w-full bg-gray-600 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed orbitron opacity-50"
-          >
-            <i className="fas fa-lock mr-2"></i>
-            Claim Available {Number(nonWorkingIncome.nextClaimTime) > 0 
-              ? new Date(Number(nonWorkingIncome.nextClaimTime) * 1000).toLocaleDateString()
-              : 'After Activation'}
-          </button>
+//           {/* Disabled Claim Button */}
+//           <button
+//             disabled
+//             className="w-full bg-gray-600 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed orbitron opacity-50"
+//           >
+//             <i className="fas fa-lock mr-2"></i>
+//             Claim Available {Number(nonWorkingIncome.nextClaimTime) > 0 
+//               ? new Date(Number(nonWorkingIncome.nextClaimTime) * 1000).toLocaleDateString()
+//               : 'After Activation'}
+//           </button>
 
-          <div className="text-center text-xs text-gray-400">
-            <i className="fas fa-info-circle mr-1"></i>
-            Rewards can be claimed every 5 minutes
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+//           <div className="text-center text-xs text-gray-400">
+//             <i className="fas fa-info-circle mr-1"></i>
+//             Rewards can be claimed every 5 minutes
+//           </div>
+//         </div>
+//       )}
+//     </>
+//   );
+// }
 
 export default function IncomeDetails() {
   const [isClient, setIsClient] = useState(false);
@@ -143,8 +143,8 @@ export default function IncomeDetails() {
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: levelIncome, isLoading: loadingLevelIncome } = useLevelIncome(address);
   const { data: globalPool, isLoading: loadingGlobalPool } = useGlobalPool(address);
-  const { data: achieverRewards, isLoading: loadingAchiever } = useAchieverRewards(address);
-  const { data: nonWorkingIncome, isLoading: loadingNonWorking } = useNonWorkingIncome(address);
+  // const { data: achieverRewards, isLoading: loadingAchiever } = useAchieverRewards(address);
+  // const { data: nonWorkingIncome, isLoading: loadingNonWorking } = useNonWorkingIncome(address);
   const withdrawLevel = useWithdrawLevel();
   const withdrawAll = useWithdrawAll();
   const claimNonWorking = useClaimNonWorking();
@@ -268,38 +268,38 @@ export default function IncomeDetails() {
     }
   };
 
-  const handleClaimNonWorking = async () => {
-    if (!nonWorkingIncome || !nonWorkingIncome.canClaim) {
-      return;
-    }
+  // const handleClaimNonWorking = async () => {
+  //   if (!nonWorkingIncome || !nonWorkingIncome.canClaim) {
+  //     return;
+  //   }
 
-    setTxModalOpen(true);
-    setTxStatus('estimating');
-    setTxHash(undefined);
-    setTxError(undefined);
+  //   setTxModalOpen(true);
+  //   setTxStatus('estimating');
+  //   setTxHash(undefined);
+  //   setTxError(undefined);
 
-    try {
-      setTxStatus('signing');
-      const result = await claimNonWorking.mutateAsync();
+  //   try {
+  //     setTxStatus('signing');
+  //     const result = await claimNonWorking.mutateAsync();
 
-      setTxHash(result.transactionHash);
-      setTxStatus('pending');
+  //     setTxHash(result.transactionHash);
+  //     setTxStatus('pending');
 
-      setTimeout(() => {
-        setTxStatus('confirmed');
-      }, 2000);
-    } catch (error) {
-      console.error('Claim non-working income failed:', error);
+  //     setTimeout(() => {
+  //       setTxStatus('confirmed');
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error('Claim non-working income failed:', error);
       
-      const parsedError = parseError(error);
-      const errorMessage = parsedError.action 
-        ? `${parsedError.message} ${parsedError.action}`
-        : parsedError.message;
+  //     const parsedError = parseError(error);
+  //     const errorMessage = parsedError.action 
+  //       ? `${parsedError.message} ${parsedError.action}`
+  //       : parsedError.message;
       
-      setTxError(errorMessage);
-      setTxStatus('failed');
-    }
-  };
+  //     setTxError(errorMessage);
+  //     setTxStatus('failed');
+  //   }
+  // };
 
   const closeTxModal = () => {
     setTxModalOpen(false);
@@ -584,7 +584,7 @@ export default function IncomeDetails() {
       </section>
 
       {/* Achiever Rewards Section */}
-      <section className="px-4 mb-6">
+      {/* <section className="px-4 mb-6">
         <div className="slide-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center mb-4">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/20 to-pink-600/20 flex items-center justify-center mr-3">
@@ -614,7 +614,6 @@ export default function IncomeDetails() {
                   </div>
                 </div>
 
-                {/* Network Stats */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="bg-pink-500/10 border border-pink-400/20 rounded-xl p-3 text-center">
                     <div className="text-xs text-gray-400 mb-1">Direct Referrals</div>
@@ -626,7 +625,6 @@ export default function IncomeDetails() {
                   </div>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="mb-6">
                   <div className="flex justify-between text-sm text-gray-400 mb-2">
                     <span>Progress to Next Level</span>
@@ -640,7 +638,6 @@ export default function IncomeDetails() {
                   </div>
                 </div>
 
-                {/* Achiever Levels with Hierarchical Display */}
                 <div className="space-y-2">
                   <div className="text-sm font-semibold text-white mb-3">Achiever Level Requirements</div>
                   {achieverRewards.levelDetails.map((levelDetail) => {
@@ -699,7 +696,6 @@ export default function IncomeDetails() {
                             </div>
                           </div>
                         </div>
-                        {/* Progress for this level */}
                         <div className="mt-2 mb-3">
                           <div className="flex justify-between text-xs text-gray-400 mb-1">
                             <span>Progress</span>
@@ -769,10 +765,10 @@ export default function IncomeDetails() {
             )}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Non-Working Rewards Section */}
-      <section className="px-4 mb-6">
+      {/* <section className="px-4 mb-6">
         <div className="slide-in" style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center mb-4">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center mr-3">
@@ -802,7 +798,7 @@ export default function IncomeDetails() {
             )}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Transaction Modal */}
       <TransactionModal

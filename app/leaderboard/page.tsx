@@ -187,9 +187,9 @@ export default function LeaderboardPage() {
             </div>
           ) : leaderboard && leaderboard.length > 0 ? (
             <div className="space-y-2">
-              {leaderboard.map((entry) => (
+              {leaderboard.map((entry, index) => (
                 <div
-                  key={entry.userId.toString()}
+                  key={entry.userId ? entry.userId.toString() : `entry-${index}`}
                   className={`glass-card rounded-xl p-4 ${
                     address && entry.address.toLowerCase() === address.toLowerCase()
                       ? 'border-2 border-cyan-400/30'

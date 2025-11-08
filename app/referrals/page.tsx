@@ -250,10 +250,10 @@ export default function Referrals() {
                             <span className="flex items-center">
                               <i className="fas fa-id-badge text-cyan-400 text-xs mr-1.5"></i>
                               {referral.userName}
-                              <span className="text-gray-500 text-xs ml-2">#{referral.userId.toString()}</span>
+                              <span className="text-gray-500 text-xs ml-2">#{referral.userId ? referral.userId.toString() : 'N/A'}</span>
                             </span>
                           ) : (
-                            `User #${referral.userId.toString()}`
+                            `User #${referral.userId ? referral.userId.toString() : 'N/A'}`
                           )}
                         </h3>
                         {referral.contactNumber ? (

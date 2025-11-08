@@ -341,7 +341,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-center space-x-4">
                 <div className="text-center">
                   <div className="text-lg font-bold text-cyan-400">
-                    {userInfo?.userId ? userInfo.userId.toString() : '-'}
+                    {userInfo?.userId && userInfo.userId !== BigInt(0) ? userInfo.userId.toString() : '-'}
                   </div>
                   <div className="text-xs text-gray-400">User ID</div>
                 </div>

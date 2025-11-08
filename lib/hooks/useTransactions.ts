@@ -116,18 +116,25 @@ export function useTransactions(
           let txUserId: bigint | undefined;
           
           try {
-            txUserId = await contract.getUserIdByAddress(addresses[index]);
+            const fetchedUserId = await contract.getUserIdByAddress(addresses[index]);
             
-            if (txUserId && Number(txUserId) > 0) {
-              try {
-                const userInfo = await contract.getUserInfo(addresses[index]);
-                userName = userInfo[9] || ''; // userName field
-              } catch (e) {
-                // Profile might not be set
+            // Ensure we have a valid userId before using it
+            if (fetchedUserId !== undefined && fetchedUserId !== null) {
+              txUserId = BigInt(fetchedUserId);
+              
+              if (txUserId && Number(txUserId) > 0) {
+                try {
+                  const userInfo = await contract.getUserInfo(addresses[index]);
+                  userName = userInfo[9] || ''; // userName field
+                } catch (e) {
+                  // Profile might not be set
+                  console.warn('Could not fetch user info for address:', addresses[index]);
+                }
               }
             }
           } catch (e) {
-            // User might not be registered
+            // User might not be registered yet
+            console.warn('Could not fetch userId for address:', addresses[index], e);
           }
           
           const txType = mapTransactionType(types[index]);

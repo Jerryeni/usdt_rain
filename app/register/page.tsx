@@ -168,12 +168,17 @@ function RegisterPageContent() {
       // Get sponsor info
       const info = await contract.getUserInfo(sponsorAddress);
       
+      // Ensure userId is valid
+      const validUserId = info.userId !== undefined && info.userId !== null 
+        ? BigInt(info.userId) 
+        : BigInt(sponsorIdNum);
+      
       setSponsorInfo({
-        userId: info.userId,
+        userId: validUserId,
         address: sponsorAddress,
         userName: info.userName || `User #${sponsorIdNum}`,
         isActive: info.isActive,
-        directReferrals: Number(info.directReferrals),
+        directReferrals: Number(info.directReferrals || 0),
       });
       setSponsorError('');
     } catch (error) {
@@ -397,7 +402,7 @@ function RegisterPageContent() {
                           </p>
                           <h3 className="text-white font-semibold">{sponsorInfo.userName}</h3>
                           <p className="text-xs text-gray-400 font-mono">
-                            ID: {sponsorInfo.userId.toString()}
+                            ID: {sponsorInfo.userId ? sponsorInfo.userId.toString() : sponsorId}
                             {sponsorInfo.directReferrals > 0 && ` • ${sponsorInfo.directReferrals} referrals`}
                           </p>
                         </div>
