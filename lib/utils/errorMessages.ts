@@ -197,6 +197,15 @@ export function parseError(error: unknown): ParsedError {
   }
 
   if (errorString.includes('not eligible')) {
+    // Check if this is about removing a user from eligible list
+    if (errorMessage.includes('removeEligibleUser') || errorMessage.includes('0x7100296d')) {
+      return {
+        title: 'User Not in List',
+        message: 'This user is not in the eligible users list.',
+        action: 'They may have already been removed or were never added. Please refresh the page.',
+      };
+    }
+    
     return {
       title: 'Not Eligible',
       message: 'You are not eligible for this action yet.',

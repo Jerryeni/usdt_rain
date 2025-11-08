@@ -252,24 +252,35 @@ export default function TransactionsPage() {
 
                     <div className="pt-3 border-t border-gray-700/30 space-y-2">
                       {tx.type === 'level_income' && tx.level && (
-                        <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center justify-between text-xs flex-wrap gap-2">
                           <div className="flex items-center">
                             <span className="text-gray-400 mr-2">From:</span>
                             <div className="flex items-center bg-cyan-500/10 px-2 py-1 rounded">
-                              <i className="fas fa-layer-group text-cyan-400 mr-1"></i>
+                              <i className="fas fa-user text-cyan-400 mr-1"></i>
                               <span className="text-cyan-400 font-medium">
-                                Network Level {tx.level}
+                                {tx.sourceUserName ? (
+                                  <>
+                                    {tx.sourceUserName}
+                                    {tx.sourceId && (
+                                      <span className="text-cyan-400/60 ml-1">
+                                        (ID: {tx.sourceId.toString()})
+                                      </span>
+                                    )}
+                                  </>
+                                ) : tx.sourceId ? (
+                                  `User #${tx.sourceId.toString()}`
+                                ) : (
+                                  `Network Level ${tx.level}`
+                                )}
                               </span>
                             </div>
                           </div>
-                          {tx.userId && (
-                            <div className="flex items-center bg-blue-500/10 px-2 py-1 rounded">
-                              <i className="fas fa-hashtag text-blue-400 mr-1"></i>
-                              <span className="text-blue-400 font-mono font-semibold">
-                                Your ID: {tx.userId.toString()}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center bg-purple-500/10 px-2 py-1 rounded">
+                            <i className="fas fa-layer-group text-purple-400 mr-1"></i>
+                            <span className="text-purple-400 font-medium">
+                              Level {tx.level}
+                            </span>
+                          </div>
                         </div>
                       )}
                       <div className="flex items-center justify-between">

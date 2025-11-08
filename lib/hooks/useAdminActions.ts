@@ -48,6 +48,8 @@ export function useAdminActions() {
       try {
         await contract.distributeGlobalPool.estimateGas();
       } catch (error: any) {
+        console.error('Distribution estimation failed:', error);
+        
         // Parse common errors
         if (error.data?.includes('0x118cdaa7')) {
           throw new Error('Only the contract owner can distribute the global pool');
@@ -58,6 +60,14 @@ export function useAdminActions() {
         if (error.message?.includes('insufficient funds')) {
           throw new Error('Insufficient funds in global pool to distribute');
         }
+        if (error.message?.includes('transfer amount exceeds balance') || 
+            error.message?.includes('BEP40')) {
+          throw new Error('Insufficient USDT balance in contract. The global pool balance may be tracked incorrectly, or the contract needs more USDT tokens.');
+        }
+        if (error.message?.includes('No eligible users')) {
+          throw new Error('No eligible users to distribute to. Add eligible users first.');
+        }
+        
         // Re-throw with original message if we can't parse it
         throw error;
       }
@@ -169,6 +179,24 @@ export function useAdminActions() {
         throw new Error('Invalid Ethereum address');
       }
       
+      // Try to estimate gas first to catch errors early
+      try {
+        await contract.addEligibleUser.estimateGas(userAddress);
+      } catch (error: any) {
+        console.error('Add eligible user estimation failed:', error);
+        
+        // Parse common errors
+        if (error.message?.includes('Already eligible')) {
+          throw new Error('This user is already in the eligible list');
+        }
+        if (error.data?.includes('0x118cdaa7')) {
+          throw new Error('Only the contract owner can add eligible users');
+        }
+        
+        // Re-throw with original message if we can't parse it
+        throw error;
+      }
+      
       const tx = await contract.addEligibleUser(userAddress);
       const receipt = await tx.wait();
       return { transactionHash: receipt.hash, userAddress };
@@ -181,6 +209,24 @@ export function useAdminActions() {
     mutationFn: async (userAddress: string) => {
       if (!signer) throw new Error('Wallet not connected');
       const contract = getWriteContract(signer);
+      
+      // Try to estimate gas first to catch errors early
+      try {
+        await contract.removeEligibleUser.estimateGas(userAddress);
+      } catch (error: any) {
+        console.error('Remove eligible user estimation failed:', error);
+        
+        // Parse common errors
+        if (error.message?.includes('Not eligible')) {
+          throw new Error('This user is not in the eligible list. They may have already been removed or were never added.');
+        }
+        if (error.data?.includes('0x118cdaa7')) {
+          throw new Error('Only the contract owner can remove eligible users');
+        }
+        
+        // Re-throw with original message if we can't parse it
+        throw error;
+      }
       
       const tx = await contract.removeEligibleUser(userAddress);
       const receipt = await tx.wait();

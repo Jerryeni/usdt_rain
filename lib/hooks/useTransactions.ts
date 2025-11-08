@@ -22,6 +22,7 @@ export interface Transaction {
   amountUSD: string;
   level?: number;
   sourceId?: bigint;
+  sourceUserName?: string;
   timestamp: Date;
   txHash?: string;
   status: 'confirmed';
@@ -114,6 +115,7 @@ export function useTransactions(
         const transactionsPromises = ids.map(async (_: any, index: number) => {
           let userName = '';
           let txUserId: bigint | undefined;
+          let sourceUserName = '';
           
           try {
             const fetchedUserId = await contract.getUserIdByAddress(addresses[index]);
@@ -137,6 +139,24 @@ export function useTransactions(
             console.warn('Could not fetch userId for address:', addresses[index], e);
           }
           
+          // Fetch source user name if sourceId exists
+          const sourceId = sourceIds[index];
+          if (sourceId && Number(sourceId) > 0) {
+            try {
+              const sourceAddress = await contract.getUserAddressById(sourceId);
+              if (sourceAddress && sourceAddress !== '0x0000000000000000000000000000000000000000') {
+                try {
+                  const sourceUserInfo = await contract.getUserInfo(sourceAddress);
+                  sourceUserName = sourceUserInfo[9] || ''; // userName field
+                } catch (e) {
+                  console.warn('Could not fetch source user info for sourceId:', sourceId.toString());
+                }
+              }
+            } catch (e) {
+              console.warn('Could not fetch source user address for sourceId:', sourceId.toString());
+            }
+          }
+          
           const txType = mapTransactionType(types[index]);
           
           return {
@@ -149,6 +169,7 @@ export function useTransactions(
             amountUSD: formatToUSD(amounts[index]),
             level: levels[index] && Number(levels[index]) > 0 ? Number(levels[index]) : undefined,
             sourceId: sourceIds[index] && Number(sourceIds[index]) > 0 ? sourceIds[index] : undefined,
+            sourceUserName: sourceUserName || undefined,
             timestamp: new Date(Number(timestamps[index]) * 1000),
             status: 'confirmed' as const,
           };
