@@ -168,17 +168,29 @@ function RegisterPageContent() {
       // Get sponsor info
       const info = await contract.getUserInfo(sponsorAddress);
       
+      // getUserInfo returns an array: [userId, sponsorId, directReferrals, totalEarned, 
+      // totalWithdrawn, isActive, activationTimestamp, nonWorkingClaimed, achieverLevel, userName, contactNumber]
+      const sponsorUserId = info[0]; // userId at index 0
+      const sponsorUserName = info[9] || ''; // userName at index 9
+      const sponsorDirectReferrals = info[2]; // directReferrals at index 2
+      const sponsorIsActive = info[5]; // isActive at index 5
+      
       // Ensure userId is valid
-      const validUserId = info.userId !== undefined && info.userId !== null 
-        ? BigInt(info.userId) 
+      const validUserId = sponsorUserId !== undefined && sponsorUserId !== null 
+        ? BigInt(sponsorUserId) 
         : BigInt(sponsorIdNum);
+      
+      // Use the sponsor's actual name if available, otherwise show User #ID
+      const displayName = sponsorUserName && sponsorUserName.trim() !== '' 
+        ? sponsorUserName 
+        : `User #${sponsorIdNum}`;
       
       setSponsorInfo({
         userId: validUserId,
         address: sponsorAddress,
-        userName: info.userName || `User #${sponsorIdNum}`,
-        isActive: info.isActive,
-        directReferrals: Number(info.directReferrals || 0),
+        userName: displayName,
+        isActive: sponsorIsActive,
+        directReferrals: Number(sponsorDirectReferrals || 0),
       });
       setSponsorError('');
     } catch (error) {
