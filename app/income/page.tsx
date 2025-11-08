@@ -7,8 +7,6 @@ import { useWallet } from '@/lib/wallet';
 import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { useLevelIncome } from '@/lib/hooks/useLevelIncome';
 import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
-import { useAchieverRewards } from '@/lib/hooks/useAchieverRewards';
-import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
 import { useCountdown } from '@/lib/hooks/useCountdown';
 import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
