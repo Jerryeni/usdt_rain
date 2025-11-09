@@ -196,6 +196,15 @@ export function parseError(error: unknown): ParsedError {
     };
   }
 
+  // Admin-specific errors
+  if (errorString.includes('already eligible') || errorString.includes('already added')) {
+    return {
+      title: 'Already Added',
+      message: 'This user is already in the eligible users list.',
+      action: 'No action needed. Refresh the page to see the current list.',
+    };
+  }
+
   if (errorString.includes('not eligible')) {
     // Check if this is about removing a user from eligible list
     if (errorMessage.includes('removeEligibleUser') || errorMessage.includes('0x7100296d')) {
@@ -210,6 +219,54 @@ export function parseError(error: unknown): ParsedError {
       title: 'Not Eligible',
       message: 'You are not eligible for this action yet.',
       action: 'Please check the requirements and try again later.',
+    };
+  }
+
+  if (errorString.includes('no eligible users') || errorString.includes('empty eligible')) {
+    return {
+      title: 'No Eligible Users',
+      message: 'There are no eligible users to distribute to.',
+      action: 'Please add eligible users before distributing the global pool.',
+    };
+  }
+
+  if (errorString.includes('insufficient pool balance') || errorString.includes('pool balance too low')) {
+    return {
+      title: 'Insufficient Pool Balance',
+      message: 'The global pool doesn\'t have enough funds to distribute.',
+      action: 'Wait for more users to activate or for the pool to accumulate funds.',
+    };
+  }
+
+  if (errorString.includes('invalid address') || errorString.includes('zero address')) {
+    return {
+      title: 'Invalid Address',
+      message: 'The wallet address you entered is not valid.',
+      action: 'Please check the address format (should start with 0x) and try again.',
+    };
+  }
+
+  if (errorString.includes('percentages') && errorString.includes('100')) {
+    return {
+      title: 'Invalid Percentages',
+      message: 'Distribution percentages must add up to exactly 100%.',
+      action: 'Please adjust the percentages and try again.',
+    };
+  }
+
+  if (errorString.includes('already manager') || errorString.includes('manager exists')) {
+    return {
+      title: 'Already a Manager',
+      message: 'This address is already assigned as a manager.',
+      action: 'No action needed. Refresh the page to see current managers.',
+    };
+  }
+
+  if (errorString.includes('not a manager') || errorString.includes('manager not found')) {
+    return {
+      title: 'Not a Manager',
+      message: 'This address is not currently a manager.',
+      action: 'They may have already been removed. Please refresh the page.',
     };
   }
 
