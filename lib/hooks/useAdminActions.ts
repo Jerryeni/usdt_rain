@@ -44,52 +44,82 @@ export function useAdminActions() {
       
       const contract = getWriteContract(signer);
       
-      // Try to estimate gas first to catch errors early
+      // Try to estimate gas, but don't fail if estimation fails
+      // Gas estimation can fail even when the actual transaction would succeed
+      let gasLimit;
       try {
-        await contract.distributeGlobalPool.estimateGas();
+        const gasEstimate = await contract.distributeGlobalPool.estimateGas();
+        gasLimit = gasEstimate * BigInt(120) / BigInt(100); // Add 20% buffer
+        console.log('Gas estimation succeeded:', gasLimit.toString());
       } catch (error: any) {
-        console.error('Distribution estimation failed:', error);
+        console.warn('Gas estimation failed, will try transaction anyway:', error.message);
+        // Don't throw here - let the actual transaction attempt proceed
+        // Gas estimation can be overly conservative
+      }
+      
+      // Attempt the actual transaction
+      try {
+        const tx = gasLimit 
+          ? await contract.distributeGlobalPool({ gasLimit })
+          : await contract.distributeGlobalPool();
+          
+        console.log('Distribution transaction sent:', tx.hash);
+        const receipt = await tx.wait();
+        console.log('Distribution transaction confirmed:', receipt.hash);
         
-        // Parse common errors
+        return { transactionHash: receipt.hash };
+      } catch (error: any) {
+        console.error('Distribution transaction failed:', error);
+        console.error('Error details:', {
+          message: error.message,
+          data: error.data,
+          code: error.code,
+          reason: error.reason,
+        });
+        
+        // Parse common errors from actual transaction failure
         if (error.data?.includes('0x118cdaa7')) {
           throw new Error('Only the contract owner can distribute the global pool');
         }
         if (error.message?.includes('EnforcedPause')) {
           throw new Error('Contract is paused. Unpause it first before distributing');
         }
-        if (error.message?.includes('insufficient funds')) {
-          throw new Error('Insufficient funds in global pool to distribute');
-        }
-        if (error.message?.includes('transfer amount exceeds balance') || 
-            error.message?.includes('BEP40')) {
-          throw new Error('Insufficient USDT balance in contract. The global pool balance may be tracked incorrectly, or the contract needs more USDT tokens.');
-        }
         if (error.message?.includes('No eligible users')) {
           throw new Error('No eligible users to distribute to. Add eligible users first.');
         }
+        if (error.message?.includes('transfer amount exceeds balance') || 
+            error.message?.includes('BEP40')) {
+          throw new Error('Insufficient USDT balance in contract. Try using "Batch Distribute" instead, or add a small buffer of USDT to the contract.');
+        }
+        if (error.message?.includes('user rejected') || error.message?.includes('User denied')) {
+          throw new Error('Transaction was rejected in your wallet');
+        }
         
-        // Re-throw with original message if we can't parse it
-        throw error;
+        // Try to extract revert reason
+        let errorMessage = 'Distribution failed';
+        if (error.reason) {
+          errorMessage += `: ${error.reason}`;
+        } else if (error.message) {
+          const match = error.message.match(/reverted with reason string '([^']+)'/);
+          if (match) {
+            errorMessage += `: ${match[1]}`;
+          } else if (error.message.includes('reverted')) {
+            errorMessage += '. The transaction was reverted by the contract.';
+          } else {
+            // Show first 200 chars of error message
+            const shortMessage = error.message.substring(0, 200);
+            errorMessage += `: ${shortMessage}`;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
-      
-      const tx = await contract.distributeGlobalPool();
-      const receipt = await tx.wait();
-      return { transactionHash: receipt.hash };
     },
     onSuccess: invalidateQueries,
   });
 
-  // Update eligible users
-  const updateEligibleUsers = useMutation({
-    mutationFn: async () => {
-      if (!signer) throw new Error('Wallet not connected');
-      const contract = getWriteContract(signer);
-      const tx = await contract.updateEligibleUsers();
-      const receipt = await tx.wait();
-      return { transactionHash: receipt.hash };
-    },
-    onSuccess: invalidateQueries,
-  });
+  // Note: updateEligibleUsers function does not exist in the contract
+  // The contract automatically uses the current eligible users list when distributing
 
   // Emergency withdraw
   const emergencyWithdraw = useMutation({
@@ -252,7 +282,6 @@ export function useAdminActions() {
     pause,
     unpause,
     distributeGlobalPool,
-    updateEligibleUsers,
     emergencyWithdraw,
     updateDistributionPercentages,
     updateReserveWallet,

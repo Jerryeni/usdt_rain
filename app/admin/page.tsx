@@ -130,10 +130,10 @@ export default function AdminDashboard() {
     );
   };
 
-  const handleUpdateEligibleUsers = () => {
+  const handleDistributeGlobalPoolBatch = () => {
     handleAdminAction(
-      () => adminActions.updateEligibleUsers.mutateAsync(),
-      'Update Eligible Users'
+      () => adminActions.distributeGlobalPoolBatch.mutateAsync(),
+      'Distribute Global Pool (Batch)'
     );
   };
 
@@ -557,7 +557,18 @@ export default function AdminDashboard() {
           
           {/* Primary Actions */}
           <div className="glass-card rounded-2xl p-4 mb-3">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Primary Actions</h3>
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Global Pool Distribution</h3>
+            
+            {/* Info Note */}
+            <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-3 mb-4">
+              <div className="flex items-start">
+                <i className="fas fa-info-circle text-blue-400 mt-0.5 mr-2"></i>
+                <div className="text-xs text-blue-300">
+                  <strong>How it works:</strong> The contract automatically distributes to all eligible users you've added. Make sure you have eligible users added before distributing.
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleDistributeGlobalPool}
@@ -571,13 +582,13 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                onClick={handleUpdateEligibleUsers}
-                disabled={adminActions.updateEligibleUsers.isPending}
-                className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 hover:from-cyan-500/30 hover:to-cyan-600/20 border border-cyan-400/30 text-white font-semibold py-4 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleDistributeGlobalPoolBatch}
+                disabled={adminActions.distributeGlobalPoolBatch.isPending}
+                className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 hover:from-purple-500/30 hover:to-purple-600/20 border border-purple-400/30 text-white font-semibold py-4 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i className="fas fa-sync-alt text-cyan-400 text-xl mb-2 block"></i>
+                <i className="fas fa-layer-group text-purple-400 text-xl mb-2 block"></i>
                 <div className="text-sm">
-                  {adminActions.updateEligibleUsers.isPending ? 'Processing...' : 'Update Eligible'}
+                  {adminActions.distributeGlobalPoolBatch.isPending ? 'Processing...' : 'Batch Distribute'}
                 </div>
               </button>
             </div>

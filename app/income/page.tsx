@@ -11,6 +11,7 @@ import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
 // import { useNonWorkingIncome } from '@/lib/hooks/useNonWorkingIncome';
 // import { useCountdown } from '@/lib/hooks/useCountdown';
 import { useWithdrawLevel, useWithdrawAll, useClaimNonWorking } from '@/lib/hooks/useWithdraw';
+import { useClaimGlobalPool } from '@/lib/hooks/useClaimGlobalPool';
 import { useContractEvents } from '@/lib/hooks/useContractEvents';
 import { IncomeTableSkeleton } from '@/components/skeletons/IncomeTableSkeleton';
 import TransactionModal, { TransactionStatus } from '@/components/TransactionModal';
@@ -147,6 +148,7 @@ export default function IncomeDetails() {
   // const { data: nonWorkingIncome, isLoading: loadingNonWorking } = useNonWorkingIncome(address);
   const withdrawLevel = useWithdrawLevel();
   const withdrawAll = useWithdrawAll();
+  const claimGlobalPool = useClaimGlobalPool();
   const claimNonWorking = useClaimNonWorking();
   const { toggleSidebar, closeSidebar } = useSidebar();
 
@@ -300,6 +302,40 @@ export default function IncomeDetails() {
   //     setTxStatus('failed');
   //   }
   // };
+
+  const handleClaimGlobalPool = async () => {
+    if (!globalPool || globalPool.userPending === BigInt(0)) {
+      return;
+    }
+
+    setTxModalOpen(true);
+    setTxStatus('estimating');
+    setTxHash(undefined);
+    setTxError(undefined);
+
+    try {
+      setTxStatus('signing');
+      const result = await claimGlobalPool.mutateAsync();
+
+      setTxHash(result.transactionHash);
+      setTxStatus('pending');
+
+      // Wait a bit then mark as confirmed
+      setTimeout(() => {
+        setTxStatus('confirmed');
+      }, 2000);
+    } catch (error) {
+      console.error('Claim global pool failed:', error);
+      
+      const parsedError = parseError(error);
+      const errorMessage = parsedError.action 
+        ? `${parsedError.message} ${parsedError.action}`
+        : parsedError.message;
+      
+      setTxError(errorMessage);
+      setTxStatus('failed');
+    }
+  };
 
   const closeTxModal = () => {
     setTxModalOpen(false);
@@ -484,54 +520,79 @@ export default function IncomeDetails() {
               </div>
             ) : globalPool ? (
               <>
-                <div className="text-center mb-6">
-                  <div className="text-sm text-gray-400 mb-2">Total Pool Balance</div>
-                  <div className="text-3xl font-bold gradient-text orbitron mb-1">
-                    ${globalPool.balanceUSD}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Distributed among {globalPool.userEligible ? 'eligible' : 'all'} active users
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-4 text-center">
-                    <div className="text-sm text-gray-400 mb-1">Your Share</div>
-                    <div className="text-xl font-bold text-purple-400 orbitron">
-                      ${globalPool.userShareUSD}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {globalPool.userEligible ? 'Eligible' : 'Not Eligible'}
+                {/* Global Pool Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-3 text-center">
+                    <div className="text-xs text-gray-400 mb-1">Total Allocated</div>
+                    <div className="text-lg font-bold text-purple-400 orbitron">
+                      ${globalPool.totalAllocatedUSD}
                     </div>
                   </div>
-
-                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-4 text-center">
-                    <div className="text-sm text-gray-400 mb-1">My Total Claimed</div>
-                    <div className="text-xl font-bold text-purple-400 orbitron">
+                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-3 text-center">
+                    <div className="text-xs text-gray-400 mb-1">Total Claimed</div>
+                    <div className="text-lg font-bold text-green-400 orbitron">
                       ${globalPool.totalClaimedUSD}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">From global pool</div>
                   </div>
                 </div>
 
-                {/* User has received reward - show rewarded status */}
-                {globalPool.hasReceivedReward && globalPool.userInEligibleList && (
-                  <div className="mt-4 bg-green-500/10 border border-green-400/20 rounded-xl p-4">
+                {/* User Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-3 text-center">
+                    <div className="text-xs text-gray-400 mb-1">Available to Claim</div>
+                    <div className="text-lg font-bold text-cyan-400 orbitron">
+                      ${globalPool.userPendingUSD}
+                    </div>
+                  </div>
+                  <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-3 text-center">
+                    <div className="text-xs text-gray-400 mb-1">My Total Claimed</div>
+                    <div className="text-lg font-bold text-blue-400 orbitron">
+                      ${globalPool.userClaimedUSD}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Claim Button */}
+                {globalPool.userInEligibleList && globalPool.userPending > BigInt(0) && (
+                  <button
+                    onClick={handleClaimGlobalPool}
+                    disabled={claimGlobalPool.isPending}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed orbitron mb-3"
+                  >
+                    {claimGlobalPool.isPending ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        Claiming...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-gift mr-2"></i>
+                        Claim ${globalPool.userPendingUSD}
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Status Messages */}
+                {globalPool.userInEligibleList && globalPool.userPending === BigInt(0) && globalPool.userClaimed > BigInt(0) && (
+                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4">
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
                         <i className="fas fa-check-circle text-2xl text-green-400"></i>
                       </div>
-                      <h3 className="text-green-400 font-semibold mb-1">Rewarded!</h3>
+                      <h3 className="text-green-400 font-semibold mb-1">All Claimed!</h3>
                       <p className="text-sm text-gray-300">
-                        You've received ${globalPool.totalClaimedUSD} from the global pool
+                        You've claimed ${globalPool.userClaimedUSD} from the global pool
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Check back daily after admin distributes
                       </p>
                     </div>
                   </div>
                 )}
 
-                {/* User is in eligible list but hasn't received reward yet */}
-                {!globalPool.hasReceivedReward && globalPool.userInEligibleList && (
-                  <div className="mt-4 bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-4">
+                {globalPool.userInEligibleList && globalPool.userPending === BigInt(0) && globalPool.userClaimed === BigInt(0) && (
+                  <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-4">
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-500/20 flex items-center justify-center">
                         <i className="fas fa-clock text-2xl text-cyan-400"></i>
@@ -544,9 +605,8 @@ export default function IncomeDetails() {
                   </div>
                 )}
 
-                {/* User needs admin approval - show chat admin button */}
                 {globalPool.needsAdminApproval && !globalPool.userInEligibleList && (
-                  <div className="mt-4 space-y-3">
+                  <div className="space-y-3">
                     <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
                       <p className="text-sm text-blue-300 text-center mb-3">
                         <i className="fas fa-info-circle mr-2"></i>
@@ -563,9 +623,8 @@ export default function IncomeDetails() {
                   </div>
                 )}
                 
-                {/* User not activated yet */}
                 {!globalPool.userEligible && !globalPool.needsAdminApproval && (
-                  <div className="mt-4 bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
+                  <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
                     <p className="text-sm text-orange-300 text-center">
                       <i className="fas fa-info-circle mr-2"></i>
                       Activate your account to become eligible for global pool rewards

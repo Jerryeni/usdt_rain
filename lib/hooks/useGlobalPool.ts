@@ -16,6 +16,16 @@ export interface GlobalPoolData {
   eligibleUsers: string[];
   needsAdminApproval: boolean;
   hasReceivedReward: boolean;
+  // New fields from getGlobalPoolStats
+  totalAllocated: bigint;
+  totalAllocatedUSD: string;
+  totalPending: bigint;
+  totalPendingUSD: string;
+  // User-specific from getUserGlobalPoolInfo
+  userPending: bigint;
+  userPendingUSD: string;
+  userClaimed: bigint;
+  userClaimedUSD: string;
 }
 
 /**
@@ -49,6 +59,12 @@ export function useGlobalPool(userAddress?: string | null) {
         let eligibleUsers: string[] = [];
         let needsAdminApproval = false;
         let hasReceivedReward = false;
+        
+        // New global pool stats
+        let totalAllocated = BigInt(0);
+        let totalPending = BigInt(0);
+        let userPending = BigInt(0);
+        let userClaimed = BigInt(0);
 
         // Fetch eligible users list and count from contract
         console.log('🔍 Fetching eligible users from contract...');
@@ -68,6 +84,29 @@ export function useGlobalPool(userAddress?: string | null) {
         
         console.log('📈 Final eligibleUsersCount:', eligibleUsersCount);
         console.log('📋 Final eligibleUsers array:', eligibleUsers);
+        
+        // Fetch global pool stats
+        try {
+          const stats = await contract.getGlobalPoolStats();
+          totalAllocated = stats[0]; // totalAllocated
+          totalClaimed = stats[1]; // totalClaimed
+          totalPending = stats[2]; // totalPending
+          const statsEligibleCount = Number(stats[3]); // eligibleCount
+          
+          // Use the count from stats if available
+          if (statsEligibleCount > 0) {
+            eligibleUsersCount = statsEligibleCount;
+          }
+          
+          console.log('📊 Global Pool Stats:', {
+            totalAllocated: (Number(totalAllocated) / 1e18).toFixed(2),
+            totalClaimed: (Number(totalClaimed) / 1e18).toFixed(2),
+            totalPending: (Number(totalPending) / 1e18).toFixed(2),
+            eligibleCount: statsEligibleCount
+          });
+        } catch (error) {
+          console.error('Could not fetch global pool stats:', error);
+        }
 
         if (userAddress) {
           try {
@@ -90,8 +129,25 @@ export function useGlobalPool(userAddress?: string | null) {
               // Calculate share based on eligible users count
               userShare = balance / BigInt(eligibleUsersCount);
             }
+            
+            // Fetch user-specific global pool info
+            try {
+              const userPoolInfo = await contract.getUserGlobalPoolInfo(userAddress);
+              userPending = userPoolInfo[0]; // pending
+              userClaimed = userPoolInfo[1]; // claimed
+              
+              console.log('👤 User Global Pool Info:', {
+                pending: (Number(userPending) / 1e18).toFixed(2),
+                claimed: (Number(userClaimed) / 1e18).toFixed(2)
+              });
+              
+              // User has received reward if they have claimed anything
+              hasReceivedReward = userClaimed > BigInt(0);
+            } catch (error) {
+              console.warn('Could not fetch user global pool info:', error);
+            }
 
-            // Calculate total global pool claimed by this user from transactions
+            // Calculate total global pool claimed by this user from transactions (legacy)
             try {
               const result = await contract.getUserTransactions(userId);
               const types = result[2]; // transaction types array
@@ -131,11 +187,25 @@ export function useGlobalPool(userAddress?: string | null) {
           eligibleUsers,
           needsAdminApproval,
           hasReceivedReward,
+          // New fields
+          totalAllocated,
+          totalAllocatedUSD: (Number(totalAllocated) / 1e18).toFixed(2),
+          totalPending,
+          totalPendingUSD: (Number(totalPending) / 1e18).toFixed(2),
+          userPending,
+          userPendingUSD: (Number(userPending) / 1e18).toFixed(2),
+          userClaimed,
+          userClaimedUSD: (Number(userClaimed) / 1e18).toFixed(2),
         };
         
         console.log('🎯 Returning GlobalPoolData:', {
           eligibleUsersCount: result.eligibleUsersCount,
           eligibleUsersLength: result.eligibleUsers.length,
+          totalAllocated: result.totalAllocatedUSD,
+          totalClaimed: result.totalClaimedUSD,
+          totalPending: result.totalPendingUSD,
+          userPending: result.userPendingUSD,
+          userClaimed: result.userClaimedUSD,
         });
         
         return result;

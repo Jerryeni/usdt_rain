@@ -68,12 +68,17 @@ export function useReferrals(userId?: bigint | null) {
       try {
         const contract = getReadContract(provider);
 
+        console.log('🔄 Fetching referrals for user:', userId.toString());
+        
         // Fetch direct referral IDs
         const referralIds = await contract.getUserReferrals(userId);
         const directCount = referralIds.length;
+        
+        console.log(`📊 Found ${directCount} direct referrals`);
 
-        // If no referrals, return empty data
+        // If no referrals, return empty data immediately
         if (directCount === 0) {
+          console.log('ℹ️ No referrals found, returning empty data');
           return {
             direct: {
               count: 0,
@@ -95,7 +100,8 @@ export function useReferrals(userId?: bigint | null) {
           };
         }
 
-        // Fetch detailed info for direct referrals
+        // Fetch detailed info for direct referrals (optimized)
+        console.log(`📥 Fetching details for ${directCount} direct referrals...`);
         const referralDetailsPromises = referralIds.map(async (refId: bigint) => {
           try {
             // Get user address
@@ -104,24 +110,15 @@ export function useReferrals(userId?: bigint | null) {
             // Get user info
             const userInfo = await contract.getUserInfo(address);
             
-            // Get contact info - try getUserProfile first (has named fields)
+            // Get contact info - simplified to reduce calls
             let userName = '';
             let contactNumber = '';
             try {
-              const profile = await contract.getUserProfile(address);
-              userName = profile.userName || profile[0] || '';
-              contactNumber = profile.contactNumber || profile[1] || '';
+              const contactInfo = await contract.getUserContactById(refId);
+              userName = contactInfo[1] || '';
+              contactNumber = contactInfo[2] || '';
             } catch (e) {
-              // If getUserProfile fails, try getUserContactById
-              try {
-                const contactInfo = await contract.getUserContactById(refId);
-                // getUserContactById returns: [address, userName, contactNumber, profileUpdatedAt]
-                userName = contactInfo[1] || '';
-                contactNumber = contactInfo[2] || '';
-              } catch (e2) {
-                // Contact info might not be set
-                console.warn(`No contact info for user ${refId}`);
-              }
+              // Contact info might not be set - skip silently
             }
 
             return {
@@ -132,11 +129,11 @@ export function useReferrals(userId?: bigint | null) {
               joinDate: new Date(Number(userInfo.activationTimestamp) * 1000),
               isActive: userInfo.isActive,
               directReferrals: Number(userInfo.directReferrals),
-              totalEarned: userInfo.totalEarned,
+              totalEarned: BigInt(userInfo.totalEarned || 0), // Ensure BigInt
               level: 1, // Direct referrals are level 1
             } as Referral;
           } catch (error) {
-            console.error(`Error fetching referral ${refId}:`, error);
+            console.error(`❌ Error fetching referral ${refId}:`, error);
             return null;
           }
         });
@@ -144,38 +141,60 @@ export function useReferrals(userId?: bigint | null) {
         const referralDetails = (await Promise.all(referralDetailsPromises)).filter(
           (ref): ref is Referral => ref !== null
         );
+        console.log(`✅ Fetched ${referralDetails.length} referral details`);
 
         // Calculate team statistics
         const activeMembers = referralDetails.filter(ref => ref.isActive).length;
-        const teamVolume = referralDetails.reduce((sum, ref) => sum + ref.totalEarned, BigInt(0));
+        const teamVolume = referralDetails.reduce((sum, ref) => {
+          // Ensure totalEarned is BigInt
+          const earned = typeof ref.totalEarned === 'bigint' ? ref.totalEarned : BigInt(ref.totalEarned || 0);
+          return sum + earned;
+        }, BigInt(0));
+        
+        console.log('👥 Team stats:', {
+          directCount,
+          activeMembers,
+          teamVolume: teamVolume.toString(),
+          teamVolumeUSD: formatToUSD(teamVolume),
+        });
 
-        // Fetch level income
-        const userAddress = await contract.getUserAddressById(userId);
-        const levelIncome = await contract.getUserLevelIncome(userAddress);
+        // Fetch level income using the correct function
+        // getLevelIncomeStatsById returns: [earned[10], withdrawn[10], available[10], totalEarned, totalWithdrawn, totalAvailable]
+        let levelIncome: bigint[] = [];
+        try {
+          const levelIncomeStats = await contract.getLevelIncomeStatsById(userId);
+          // Extract the 'earned' array (first element of the returned tuple)
+          levelIncome = levelIncomeStats[0]; // earned[10]
+          console.log('💰 Level income (earned):', levelIncome.map((income: bigint, i: number) => `L${i+1}: ${formatToUSD(income)}`));
+          console.log('💰 Total earned from all levels:', formatToUSD(levelIncomeStats[3]));
+        } catch (error) {
+          console.warn('⚠️ Could not fetch level income stats, using zeros:', error);
+          // Fallback to zeros if function doesn't exist or fails
+          levelIncome = Array.from({ length: 10 }, () => BigInt(0));
+        }
 
         // Use new contract function to get accurate level counts for all 10 levels
         let levelCountsArray: bigint[] = [];
         let totalMembers = directCount;
         
+        console.log('📊 Fetching level counts for user:', userId.toString());
         try {
           // Try the new getUserLevelCounts10ById function
           levelCountsArray = await contract.getUserLevelCounts10ById(userId);
+          console.log('✅ Level counts from contract:', levelCountsArray.map(c => c.toString()));
           // Calculate total from all levels
           totalMembers = levelCountsArray.reduce((sum, count) => sum + Number(count), 0);
+          console.log('📈 Total members calculated:', totalMembers);
         } catch (error) {
-          console.warn('getUserLevelCounts10ById not available, using fallback');
+          console.warn('⚠️ getUserLevelCounts10ById not available, using fallback');
           // Fallback: only count direct referrals
           levelCountsArray = Array.from({ length: 10 }, (_, i) => i === 0 ? BigInt(directCount) : BigInt(0));
         }
         
-        // Get accurate total network count from contract
-        let accurateTotalMembers = totalMembers;
-        try {
-          const networkCount = await contract.getUserTotalNetworkCountById(userId);
-          accurateTotalMembers = Number(networkCount);
-        } catch (error) {
-          console.warn('getUserTotalNetworkCountById not available, using calculated total');
-        }
+        // Note: getUserTotalNetworkCountById doesn't exist in contract
+        // Using calculated total from level counts
+        const accurateTotalMembers = totalMembers;
+        console.log('🎯 Final total members:', accurateTotalMembers);
 
         // Build level referrals data with accurate counts from contract
         const byLevel: LevelReferrals[] = Array.from({ length: 10 }, (_, i) => {
@@ -204,15 +223,41 @@ export function useReferrals(userId?: bigint | null) {
             teamVolumeUSD: formatToUSD(teamVolume),
           },
         };
-      } catch (error) {
-        console.error('Error fetching referrals:', error);
-        throw error;
+      } catch (error: any) {
+        console.error('❌ Error fetching referrals:', error);
+        console.error('Error details:', {
+          message: error.message,
+          userId: userId?.toString(),
+        });
+        
+        // Return empty data instead of throwing to prevent infinite loading
+        return {
+          direct: {
+            count: 0,
+            userIds: [],
+            referrals: [],
+          },
+          byLevel: Array.from({ length: 10 }, (_, i) => ({
+            level: i + 1,
+            count: 0,
+            income: BigInt(0),
+            incomeUSD: '0.00',
+          })),
+          teamStats: {
+            totalMembers: 0,
+            activeMembers: 0,
+            teamVolume: BigInt(0),
+            teamVolumeUSD: '0.00',
+          },
+        };
       }
     },
     enabled: !!userId && userId !== BigInt(0) && !!provider,
-    staleTime: 60000, // 1 minute
-    refetchInterval: 120000, // Refetch every 2 minutes
-    retry: 2,
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Refetch every minute
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 1, // Reduce retries from 2 to 1 for faster failure
   });
 }
 

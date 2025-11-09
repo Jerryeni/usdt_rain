@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useWallet } from '@/lib/wallet';
+import { useUserInfo } from '@/lib/hooks/useUserInfo';
 import { formatAddress } from '@/lib/config/env';
 
 interface SidebarProps {
@@ -10,6 +11,14 @@ interface SidebarProps {
 
 export default function Sidebar({ onClose }: SidebarProps) {
   const { address, disconnect } = useWallet();
+  const { data: userInfo } = useUserInfo(address);
+  
+  // Check if user is fully activated
+  const isFullyActivated = userInfo && 
+    Number(userInfo.userId) > 0 && 
+    userInfo.userName && 
+    userInfo.contactNumber && 
+    userInfo.isActive;
 
   const handleDisconnect = () => {
     if (confirm('Are you sure you want to disconnect your wallet?')) {
@@ -42,44 +51,75 @@ export default function Sidebar({ onClose }: SidebarProps) {
           </div>
 
           <nav className="space-y-2">
-            <Link
-              href="/"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-home text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Dashboard</span>
-            </Link>
+            {/* Protected Links - Only for fully activated users */}
+            {isFullyActivated && (
+              <>
+                <Link
+                  href="/"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-home text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Dashboard</span>
+                </Link>
 
-           
-            <Link
-              href="/share"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-share-alt text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Share & Earn</span>
-            </Link>
+                {/* <Link
+                  href="/income"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-chart-line text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Income</span>
+                </Link> */}
 
-            <Link
-              href="/leaderboard"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-question-circle text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Leaderboard</span>
-            </Link>
+                {/* <Link
+                  href="/referrals"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-users text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">My Team</span>
+                </Link> */}
 
-             <Link
-              href="/settings"
-              onClick={onClose}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
-            >
-              <i className="fas fa-question-circle text-cyan-400 w-5"></i>
-              <span className="text-white group-hover:text-cyan-400 transition-colors">Settings</span>
-            </Link>
+                {/* <Link
+                  href="/transactions"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-exchange-alt text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Transactions</span>
+                </Link> */}
 
+                <Link
+                  href="/share"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-share-alt text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Share & Earn</span>
+                </Link>
 
+                <Link
+                  href="/leaderboard"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-trophy text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Leaderboard</span>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                >
+                  <i className="fas fa-cog text-cyan-400 w-5"></i>
+                  <span className="text-white group-hover:text-cyan-400 transition-colors">Settings</span>
+                </Link>
+              </>
+            )}
+
+            {/* Public Links - Always visible */}
             <Link
               href="/help"
               onClick={onClose}
@@ -89,15 +129,25 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <span className="text-white group-hover:text-cyan-400 transition-colors">Help & Support</span>
             </Link>
 
-            
-
-            <button
-              onClick={handleDisconnect}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-colors group"
+            <Link
+              href="/terms"
+              onClick={onClose}
+              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group"
             >
-              <i className="fas fa-sign-out-alt text-red-400 w-5"></i>
-              <span className="text-white group-hover:text-red-400 transition-colors">Disconnect</span>
-            </button>
+              <i className="fas fa-file-contract text-cyan-400 w-5"></i>
+              <span className="text-white group-hover:text-cyan-400 transition-colors">Terms & Conditions</span>
+            </Link>
+
+            {/* Disconnect Button */}
+            {address && (
+              <button
+                onClick={handleDisconnect}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-colors group"
+              >
+                <i className="fas fa-sign-out-alt text-red-400 w-5"></i>
+                <span className="text-white group-hover:text-red-400 transition-colors">Disconnect</span>
+              </button>
+            )}
           </nav>
 
           {address && (

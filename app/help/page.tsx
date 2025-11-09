@@ -55,67 +55,58 @@ function HelpPageContent() {
 
   const faqs = [
     {
-      question: "How do I claim my achiever rewards?",
-      answer: "Once you've achieved a level by meeting the requirements (direct referrals for Level 1, or users at previous levels for Levels 2-5), a 'Claim Level X Reward' button will appear on the Income page. Click it to claim your reward. After claiming, please contact support to receive your reward payout."
+      question: "How do I activate my account?",
+      answer: "To activate your account, deposit $25 (UBC-20) USDT to the contract. This one-time activation fee is distributed as: Level Income to your upline, Global Pool for all users, and Reserve for platform maintenance."
     },
     {
       question: "What are the different income streams?",
-      answer: "USDT RAIN has 4 income streams: 1) Level Income - Commission from your 10-level network (auto-distributed), 2) Global Pool - Shared among eligible users (auto-distributed), 3) Achiever Rewards - Achievement bonuses for reaching levels (claim via button, then contact support), 4) Monthly Rewards - For users without direct referrals (claim every 30 days)."
+      answer: "USDT RAIN has 2 income streams: 1) Level Income - Commission from your 10-level network (auto-distributed), 2) Global Pool - Shared among eligible users (auto-distributed, you must claim everyday)."
     },
     {
-      question: "How does the achiever level system work?",
-      answer: "Level 1 requires direct referrals. Levels 2-5 require users at the previous achiever level in your network. For example, Level 2 requires X users at Level 1, Level 3 requires X users at Level 2, and so on. This creates a hierarchical achievement system."
-    },
-    {
-      question: "When can I claim monthly rewards?",
-      answer: "Monthly rewards (non-working income) are available only for users WITHOUT direct referrals. You can claim every 30 days. A countdown timer shows when your next claim is available."
-    },
-    {
-      question: "How do I activate my account?",
-      answer: "To activate your account, deposit $25 USDT to the contract. This one-time activation fee is distributed as: Level Income to your upline, Global Pool for all users, and Reserve for platform maintenance."
-    },
-    {
-      question: "What happens after I claim an achiever reward?",
-      answer: "After successfully claiming an achiever reward on the blockchain, you need to contact our support team to receive your reward payout. The claim marks your achievement on-chain, and our team will process the actual reward transfer."
+      question: "How are level income and Global Pool auto-distributed?",
+      answer: "Level income is automatically transferred to your wallet whenever your team members activate their IDs. Global Pool rewards are generated automatically, but you must manually claim your Global Pool rewards once every day."
     },
     {
       question: "How do I contact support for my reward?",
-      answer: "You can reach our support team via: Email: support@usdtrain.com, Telegram: @USDTRainSupport, or WhatsApp: +1234567890. Please provide your wallet address and the level you claimed."
-    },
-    {
-      question: "Why are level income and global pool auto-distributed?",
-      answer: "Level income and global pool rewards are automatically sent to your wallet when earned. There's no need to claim them manually. Only monthly rewards and achiever rewards require manual claiming."
+      answer: "You can't contact our support team directly, but you can follow and chat via our social media channels below."
     }
   ];
 
   const supportChannels = [
     {
-      icon: 'fa-envelope',
-      title: 'Email Support',
-      description: 'support@usdtrain.com',
-      link: 'mailto:support@usdtrain.com',
-      color: 'from-blue-500 to-cyan-500'
+      icon: 'fa-brands fa-instagram',
+      title: 'Instagram',
+      description: '@usdtrains',
+      link: 'https://www.instagram.com/usdtrains',
+      color: 'from-pink-500 to-purple-500'
     },
     {
-      icon: 'fa-paper-plane',
+      icon: 'fa-brands fa-facebook',
+      title: 'Facebook',
+      description: 'USDT Rains',
+      link: 'https://www.facebook.com/usdtrains',
+      color: 'from-blue-600 to-blue-500'
+    },
+    {
+      icon: 'fa-brands fa-telegram',
       title: 'Telegram',
-      description: '@USDTRainSupport',
-      link: 'https://t.me/USDTRainSupport',
+      description: '@usdtrains',
+      link: 'https://t.me/usdtrains',
       color: 'from-cyan-500 to-blue-500'
     },
     {
       icon: 'fa-brands fa-whatsapp',
       title: 'WhatsApp',
-      description: '+1 (234) 567-8900',
-      link: 'https://wa.me/1234567890',
+      description: 'Join Channel',
+      link: 'https://whatsapp.com/channel/0029VbBcRYnAInPeytt2470H',
       color: 'from-green-500 to-emerald-500'
     },
     {
-      icon: 'fa-brands fa-discord',
-      title: 'Discord',
-      description: 'Join our community',
-      link: 'https://discord.gg/usdtrain',
-      color: 'from-purple-500 to-pink-500'
+      icon: 'fa-brands fa-youtube',
+      title: 'YouTube',
+      description: '@USDTRAIN',
+      link: 'https://www.youtube.com/@USDTRAIN',
+      color: 'from-red-500 to-red-600'
     }
   ];
 
@@ -143,45 +134,10 @@ function HelpPageContent() {
       {/* Sidebar */}
       <Sidebar onClose={closeSidebar} />
 
-      {/* Reward Claim Success Message */}
-      {fromReward && (
-        <section className="px-4 py-6">
-          <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-2xl p-6 slide-in">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center animate-pulse">
-                <i className="fas fa-trophy text-3xl text-green-400"></i>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2 orbitron">🎉 Reward Claimed Successfully!</h3>
-              <p className="text-gray-300 mb-4 text-base">
-                Your achiever reward has been marked on the blockchain. Please contact our support team below to receive your reward payout.
-              </p>
-              <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 mb-4">
-                <p className="text-sm text-green-300 font-semibold mb-2">
-                  <i className="fas fa-info-circle mr-2"></i>
-                  Next Steps:
-                </p>
-                <ol className="text-left text-sm text-gray-300 space-y-2 ml-6">
-                  <li>1. Choose a support channel below</li>
-                  <li>2. Provide your wallet address</li>
-                  <li>3. Mention the level you claimed</li>
-                  <li>4. Our team will process your reward</li>
-                </ol>
-              </div>
-              <div className="bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-3">
-                <p className="text-xs text-yellow-300">
-                  <i className="fas fa-clock mr-2"></i>
-                  Typical processing time: 24-48 hours
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Support Channels */}
-      <section className="px-4 mb-6">
+      {/* Social Media Channels */}
+      <section className="px-4 mb-6 mt-6">
         <div className="slide-in" style={{ animationDelay: '0.1s' }}>
-          <h2 className="text-lg font-bold text-white mb-4">Contact Support</h2>
+          <h2 className="text-lg font-bold text-white mb-4">Follow Us on Social Media</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {supportChannels.map((channel, index) => (
               <a
