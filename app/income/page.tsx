@@ -521,17 +521,17 @@ export default function IncomeDetails() {
             ) : globalPool ? (
               <>
                 {/* Global Pool Stats */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-3 text-center">
+                <div className="grid grid-cols-1 gap-3 mb-4">
+                  {/* <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-3 text-center">
                     <div className="text-xs text-gray-400 mb-1">Total Allocated</div>
                     <div className="text-lg font-bold text-purple-400 orbitron">
                       ${globalPool.totalAllocatedUSD}
                     </div>
-                  </div>
+                  </div> */}
                   <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-3 text-center">
-                    <div className="text-xs text-gray-400 mb-1">Total Claimed</div>
+                    <div className="text-xs text-gray-400 mb-1">Total Pool</div>
                     <div className="text-lg font-bold text-green-400 orbitron">
-                      ${globalPool.totalClaimedUSD}
+                      ${globalPool.balanceUSD}
                     </div>
                   </div>
                 </div>

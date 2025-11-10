@@ -36,12 +36,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-cyan-500/20 flex items-center justify-center">
-                <i className="fas fa-coins text-green-400 text-sm"></i>
-              </div>
-              <span className="text-white font-bold orbitron">USDT RAIN</span>
-            </div>
+            <img 
+              src="/usdtrain-logo.png" 
+              alt="USDT RAINS" 
+              className="h-10 w-auto object-contain"
+            />
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-lg glass-card flex items-center justify-center"

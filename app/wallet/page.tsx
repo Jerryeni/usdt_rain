@@ -100,9 +100,13 @@ export default function WalletPage() {
 
       <div className="max-w-md w-full mx-4">
         <div className="glass-card rounded-2xl p-8 slide-in text-center">
-          {/* Logo/Icon */}
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-            <i className="fas fa-wallet text-4xl text-cyan-400"></i>
+          {/* Logo */}
+          <div className="mx-auto mb-6 flex items-center justify-center">
+            <img 
+              src="/usdtrain-logo.png" 
+              alt="USDT RAINS" 
+              className="h-20 w-auto object-contain"
+            />
           </div>
 
           {/* Title */}

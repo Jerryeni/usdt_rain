@@ -47,3 +47,5 @@ next-env.d.ts
 .kluster
 .kiro
 docs
+out
+usdtrain

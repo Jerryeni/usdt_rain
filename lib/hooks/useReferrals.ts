@@ -107,29 +107,32 @@ export function useReferrals(userId?: bigint | null) {
             // Get user address
             const address = await contract.getUserAddressById(refId);
             
-            // Get user info
+            // Get user info - returns array with 11 elements
+            // [0] userId, [1] sponsorId, [2] directReferrals, [3] totalEarned, 
+            // [4] activationTimestamp, [5] isActive, [6] levelIncomeEarned, 
+            // [7] levelIncomeWithdrawn, [8] levelIncomeAvailable, [9] userName, [10] contactNumber
             const userInfo = await contract.getUserInfo(address);
             
-            // Get contact info - simplified to reduce calls
-            let userName = '';
-            let contactNumber = '';
-            try {
-              const contactInfo = await contract.getUserContactById(refId);
-              userName = contactInfo[1] || '';
-              contactNumber = contactInfo[2] || '';
-            } catch (e) {
-              // Contact info might not be set - skip silently
-            }
-
+            // Extract userName and contactNumber from getUserInfo (indices 9 and 10)
+            const userName = userInfo[9] || '';
+            const contactNumber = userInfo[10] || '';
+            
+            // Parse activation timestamp safely
+            const activationTimestamp = Number(userInfo[4] || 0);
+            const joinDate = activationTimestamp > 0 ? new Date(activationTimestamp * 1000) : new Date();
+            
+            // Parse totalEarned safely
+            const totalEarned = userInfo[3] ? BigInt(userInfo[3]) : BigInt(0);
+            
             return {
               userId: refId,
               address,
               userName,
               contactNumber,
-              joinDate: new Date(Number(userInfo.activationTimestamp) * 1000),
-              isActive: userInfo.isActive,
-              directReferrals: Number(userInfo.directReferrals),
-              totalEarned: BigInt(userInfo.totalEarned || 0), // Ensure BigInt
+              joinDate,
+              isActive: Boolean(userInfo[5]),
+              directReferrals: Number(userInfo[2] || 0),
+              totalEarned,
               level: 1, // Direct referrals are level 1
             } as Referral;
           } catch (error) {
@@ -299,35 +302,30 @@ export function useReferralsPaginated(
         const referralDetailsPromises = paginatedIds.map(async (refId: bigint) => {
           try {
             const address = await contract.getUserAddressById(refId);
+            
+            // Get user info - returns array with 11 elements
             const userInfo = await contract.getUserInfo(address);
             
-            let userName = '';
-            let contactNumber = '';
-            try {
-              const profile = await contract.getUserProfile(address);
-              userName = profile.userName || profile[0] || '';
-              contactNumber = profile.contactNumber || profile[1] || '';
-            } catch (e) {
-              // If getUserProfile fails, try getUserContactById
-              try {
-                const contactInfo = await contract.getUserContactById(refId);
-                // getUserContactById returns: [address, userName, contactNumber, profileUpdatedAt]
-                userName = contactInfo[1] || '';
-                contactNumber = contactInfo[2] || '';
-              } catch (e2) {
-                // Contact info might not be set
-              }
-            }
+            // Extract userName and contactNumber from getUserInfo (indices 9 and 10)
+            const userName = userInfo[9] || '';
+            const contactNumber = userInfo[10] || '';
+            
+            // Parse activation timestamp safely
+            const activationTimestamp = Number(userInfo[4] || 0);
+            const joinDate = activationTimestamp > 0 ? new Date(activationTimestamp * 1000) : new Date();
+            
+            // Parse totalEarned safely
+            const totalEarned = userInfo[3] ? BigInt(userInfo[3]) : BigInt(0);
 
             return {
               userId: refId,
               address,
               userName,
               contactNumber,
-              joinDate: new Date(Number(userInfo.activationTimestamp) * 1000),
-              isActive: userInfo.isActive,
-              directReferrals: Number(userInfo.directReferrals),
-              totalEarned: userInfo.totalEarned,
+              joinDate,
+              isActive: Boolean(userInfo[5]),
+              directReferrals: Number(userInfo[2] || 0),
+              totalEarned,
               level: 1,
             } as Referral;
           } catch (error) {

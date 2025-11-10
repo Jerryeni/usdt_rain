@@ -288,7 +288,7 @@ export default function Referrals() {
                     </div>
                     <div className="text-center">
                       <div className="text-sm text-cyan-400 font-semibold">
-                        ${(Number(referral.totalEarned) / 1e18).toFixed(2)}
+                        ${referral.totalEarned ? (Number(referral.totalEarned) / 1e18).toFixed(2) : '0.00'}
                       </div>
                       <div className="text-xs text-gray-400">Earned</div>
                     </div>

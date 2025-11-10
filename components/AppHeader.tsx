@@ -25,11 +25,12 @@ export default function AppHeader({ title, subtitle, onMenuClick }: AppHeaderPro
   return (
     <header className="px-4 py-4 border-b border-gray-800/50 backdrop-blur-lg bg-black/20">
       <div className="flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500/20 to-cyan-500/20 flex items-center justify-center">
-            <i className="fas fa-coins text-green-400 text-sm"></i>
-          </div>
-          <span className="text-white font-bold orbitron">USDT RAIN</span>
+        <Link href="/" className="flex items-center">
+          <img 
+            src="/usdtrain-logo.png" 
+            alt="USDT RAINS" 
+            className="h-10 w-auto object-contain"
+          />
         </Link>
 
         <div className="text-center absolute left-1/2 transform -translate-x-1/2">
