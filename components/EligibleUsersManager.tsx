@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGlobalPool } from '@/lib/hooks/useGlobalPool';
 import { useAdminActions } from '@/lib/hooks/useAdminActions';
 import { useToast } from '@/components/ui/use-toast';
+import { backendApi } from '@/lib/services/backendApi';
 
 export function EligibleUsersManager() {
   const { data: globalPool, refetch, isLoading } = useGlobalPool();
@@ -13,13 +14,31 @@ export function EligibleUsersManager() {
   const [isAdding, setIsAdding] = useState(false);
   const [removingAddress, setRemovingAddress] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [useBackend, setUseBackend] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(false);
   
+  // Check backend availability on mount
+  useEffect(() => {
+    const checkBackend = async () => {
+      const available = await backendApi.isAvailable();
+      setBackendAvailable(available);
+      if (available) {
+        console.log('✅ Backend API is available');
+      } else {
+        console.log('⚠️ Backend API is not available - using direct contract calls');
+      }
+    };
+    checkBackend();
+  }, []);
+
   // Debug logging
   console.log('🎨 EligibleUsersManager render:', {
     isLoading,
     globalPool,
     eligibleUsersCount: globalPool?.eligibleUsersCount,
     eligibleUsersLength: globalPool?.eligibleUsers?.length,
+    backendAvailable,
+    useBackend,
   });
 
   const handleRefresh = async () => {
@@ -43,13 +62,38 @@ export function EligibleUsersManager() {
     
     setIsAdding(true);
     try {
-      await addEligibleUser.mutateAsync(newUserAddress);
+      if (useBackend && backendAvailable) {
+        // Use backend API
+        console.log('🔄 Adding user via backend API:', newUserAddress);
+        const response = await backendApi.addEligibleUser(newUserAddress);
+        
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to add user via backend');
+        }
+        
+        toast({
+          title: 'User Added (Backend)',
+          description: response.data?.alreadyEligible 
+            ? `${newUserAddress} is already eligible`
+            : `${newUserAddress} has been added to the eligible list`,
+          variant: 'success',
+        });
+        
+        if (response.data?.transaction?.hash) {
+          console.log('✅ Transaction hash:', response.data.transaction.hash);
+        }
+      } else {
+        // Use direct contract call
+        console.log('🔄 Adding user via direct contract call:', newUserAddress);
+        await addEligibleUser.mutateAsync(newUserAddress);
+        toast({
+          title: 'User Added (Contract)',
+          description: `${newUserAddress} has been added to the eligible list`,
+          variant: 'success',
+        });
+      }
+      
       setNewUserAddress('');
-      toast({
-        title: 'User Added',
-        description: `${newUserAddress} has been added to the eligible list`,
-        variant: 'success',
-      });
       // Refresh the data after adding
       setTimeout(() => refetch(), 2000);
     } catch (error: any) {
@@ -69,12 +113,35 @@ export function EligibleUsersManager() {
     
     setRemovingAddress(address);
     try {
-      await removeEligibleUser.mutateAsync(address);
-      toast({
-        title: 'User Removed',
-        description: `${address} has been removed from the eligible list`,
-        variant: 'success',
-      });
+      if (useBackend && backendAvailable) {
+        // Use backend API
+        console.log('🔄 Removing user via backend API:', address);
+        const response = await backendApi.removeEligibleUser(address);
+        
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to remove user via backend');
+        }
+        
+        toast({
+          title: 'User Removed (Backend)',
+          description: `${address} has been removed from the eligible list`,
+          variant: 'success',
+        });
+        
+        if (response.data?.transaction?.hash) {
+          console.log('✅ Transaction hash:', response.data.transaction.hash);
+        }
+      } else {
+        // Use direct contract call
+        console.log('🔄 Removing user via direct contract call:', address);
+        await removeEligibleUser.mutateAsync(address);
+        toast({
+          title: 'User Removed (Contract)',
+          description: `${address} has been removed from the eligible list`,
+          variant: 'success',
+        });
+      }
+      
       // Refresh the data after removing
       setTimeout(() => refetch(), 2000);
     } catch (error: any) {
@@ -91,6 +158,34 @@ export function EligibleUsersManager() {
 
   return (
     <div className="glass-card rounded-2xl p-6">
+      {/* Backend Status Banner */}
+      {backendAvailable && (
+        <div className="mb-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
+              <span className="text-sm text-green-300 font-semibold">Backend API Connected</span>
+            </div>
+            <button
+              onClick={() => setUseBackend(!useBackend)}
+              className={`text-xs px-3 py-1 rounded-lg transition-all ${
+                useBackend
+                  ? 'bg-green-500/20 text-green-300 border border-green-400/30'
+                  : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'
+              }`}
+            >
+              {useBackend ? 'Using Backend' : 'Using Contract'}
+            </button>
+          </div>
+          {useBackend && (
+            <p className="text-xs text-green-400/70 mt-2">
+              <i className="fas fa-info-circle mr-1"></i>
+              Backend will validate users automatically (registered, activated, 10+ referrals)
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <div className="text-sm text-gray-400 mb-2">Eligible Users Count</div>

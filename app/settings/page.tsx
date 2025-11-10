@@ -31,15 +31,15 @@ export default function SettingsPage() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Version</span>
-                  <span className="text-white font-semibold">2.1.0</span>
+                  <span className="text-white font-semibold">1.0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Network</span>
-                  <span className="text-cyan-400 font-semibold">BSC Testnet</span>
+                  <span className="text-cyan-400 font-semibold">Universe Chain Mainnet</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Chain ID</span>
-                  <span className="text-white font-semibold">97</span>
+                  <span className="text-white font-semibold">1137</span>
                 </div>
               </div>
             </div>

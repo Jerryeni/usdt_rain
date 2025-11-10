@@ -197,11 +197,43 @@ export function parseError(error: unknown): ParsedError {
   }
 
   // Admin-specific errors
+  if (errorString.includes('only owner') || errorString.includes('caller is not the owner')) {
+    return {
+      title: 'Access Denied',
+      message: 'Only the contract owner can perform this action.',
+      action: 'Please connect with the owner wallet.',
+    };
+  }
+
   if (errorString.includes('already eligible') || errorString.includes('already added')) {
     return {
       title: 'Already Added',
       message: 'This user is already in the eligible users list.',
       action: 'No action needed. Refresh the page to see the current list.',
+    };
+  }
+  
+  if (errorString.includes('transfer amount exceeds balance') || errorString.includes('bep40')) {
+    return {
+      title: 'Insufficient Balance',
+      message: 'The contract doesn\'t have enough USDT to complete this distribution.',
+      action: 'Please wait for more funds to accumulate or use batch distribution.',
+    };
+  }
+  
+  if (errorString.includes('no pending distribution') || errorString.includes('nothing to claim')) {
+    return {
+      title: 'Nothing to Claim',
+      message: 'There are no pending rewards to claim at this time.',
+      action: 'Wait for the admin to distribute the global pool.',
+    };
+  }
+  
+  if (errorString.includes('distribution in progress') || errorString.includes('batch not complete')) {
+    return {
+      title: 'Distribution In Progress',
+      message: 'A batch distribution is currently in progress.',
+      action: 'Please wait for it to complete before starting a new one.',
     };
   }
 

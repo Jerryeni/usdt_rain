@@ -1,20 +1,23 @@
 # USDT RAIN - Web3 MLM Platform
 
-A decentralized multi-level marketing (MLM) platform built on Binance Smart Chain (BSC) that enables users to earn USDT through referrals and level-based income distribution.
+A decentralized multi-level marketing (MLM) platform built on UCChain that enables users to earn USDT through referrals and level-based income distribution.
+
+> **🎉 Backend Integration Complete!** The backend API is fully integrated and production-ready. See [INTEGRATION_SUMMARY.md](./INTEGRATION_SUMMARY.md) for details.
 
 ## 📚 Documentation
 
 Complete documentation is available in the [`docs/`](./docs) directory:
 
-- **[Admin Documentation](./docs/admin/)** - Complete admin guides and operations manual
-- **[User Guides](./docs/guides/)** - Guides for platform users
-- **[Technical Docs](./docs/)** - Architecture, deployment, and testing guides
+- **[📖 Documentation Index](./docs/INDEX.md)** - Complete documentation navigation
+- **[🚀 Backend Documentation](./docs/backend/)** - Backend API and setup guides
+- **[📖 Integration Guides](./docs/guides/)** - Backend-frontend integration and deployment
+- **[📋 Reference](./docs/reference/)** - Smart contract integration details
 
 **Quick Links:**
-- [Admin Dashboard Guide](./docs/admin/ADMIN_DASHBOARD.md)
-- [First User Guide](./docs/guides/FIRST_USER_GUIDE.md)
-- [Quick Start](./docs/QUICKSTART.md)
-- [Architecture](./docs/ARCHITECTURE.md)
+- [Backend Quick Start](./docs/backend/📖_READ_ME_FIRST.md) - Get backend running in 3 steps
+- [Backend-Frontend Integration](./docs/guides/BACKEND_FRONTEND_INTEGRATION_GUIDE.md) - Complete integration guide
+- [Production Deployment](./docs/backend/PRODUCTION_DEPLOYMENT.md) - Deploy to production
+- [Backend API Reference](./docs/backend/README.md) - Complete API documentation
 
 ## Features
 

@@ -1,22 +1,64 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAdminActions } from '@/lib/hooks/useAdminActions';
 import { useDistributionProgress } from '@/lib/hooks/useDistributionProgress';
 import { useToast } from '@/components/ui/use-toast';
+import { backendApi } from '@/lib/services/backendApi';
 
 export function BatchDistribution() {
   const { distributeGlobalPoolBatch } = useAdminActions();
   const { data: progress } = useDistributionProgress();
   const { toast } = useToast();
+  const [useBackend, setUseBackend] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(false);
+  const [isDistributing, setIsDistributing] = useState(false);
+
+  // Check backend availability on mount
+  useEffect(() => {
+    const checkBackend = async () => {
+      const available = await backendApi.isAvailable();
+      setBackendAvailable(available);
+      if (available) {
+        console.log('✅ Backend API is available for distribution');
+      }
+    };
+    checkBackend();
+  }, []);
 
   const handleDistributeBatch = async () => {
+    setIsDistributing(true);
     try {
-      await distributeGlobalPoolBatch.mutateAsync();
-      toast({
-        title: 'Batch Distributed',
-        description: 'Global pool batch has been distributed successfully',
-        variant: 'success',
-      });
+      if (useBackend && backendAvailable) {
+        // Use backend API
+        console.log('🔄 Distributing global pool via backend API');
+        const response = await backendApi.distributeGlobalPool();
+        
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to distribute via backend');
+        }
+        
+        toast({
+          title: 'Pool Distributed (Backend)',
+          description: response.data 
+            ? `Distributed ${response.data.distribution.totalDistributed.usdt} USDT to ${response.data.distribution.eligibleUsers} users`
+            : 'Global pool has been distributed successfully',
+          variant: 'success',
+        });
+        
+        if (response.data?.transaction?.hash) {
+          console.log('✅ Transaction hash:', response.data.transaction.hash);
+        }
+      } else {
+        // Use direct contract call
+        console.log('🔄 Distributing global pool via direct contract call');
+        await distributeGlobalPoolBatch.mutateAsync();
+        toast({
+          title: 'Batch Distributed (Contract)',
+          description: 'Global pool batch has been distributed successfully',
+          variant: 'success',
+        });
+      }
     } catch (error: any) {
       console.error('Failed to distribute batch:', error);
       toast({
@@ -24,14 +66,44 @@ export function BatchDistribution() {
         description: error.message || 'An error occurred',
         variant: 'destructive',
       });
+    } finally {
+      setIsDistributing(false);
     }
   };
 
   return (
     <div className="glass-card rounded-2xl p-6">
+      {/* Backend Status Banner */}
+      {backendAvailable && (
+        <div className="mb-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
+              <span className="text-sm text-green-300 font-semibold">Backend API Connected</span>
+            </div>
+            <button
+              onClick={() => setUseBackend(!useBackend)}
+              className={`text-xs px-3 py-1 rounded-lg transition-all ${
+                useBackend
+                  ? 'bg-green-500/20 text-green-300 border border-green-400/30'
+                  : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'
+              }`}
+            >
+              {useBackend ? 'Using Backend' : 'Using Contract'}
+            </button>
+          </div>
+          {useBackend && (
+            <p className="text-xs text-green-400/70 mt-2">
+              <i className="fas fa-info-circle mr-1"></i>
+              Backend will distribute to all eligible users in one transaction
+            </p>
+          )}
+        </div>
+      )}
+
       <h3 className="text-white font-semibold mb-4 flex items-center">
         <i className="fas fa-share-alt text-cyan-400 mr-2"></i>
-        Batch Distribution
+        {useBackend && backendAvailable ? 'Global Pool Distribution' : 'Batch Distribution'}
       </h3>
 
       {/* Distribution Stats */}
@@ -96,13 +168,13 @@ export function BatchDistribution() {
       {/* Distribute Button */}
       <button
         onClick={handleDistributeBatch}
-        disabled={distributeGlobalPoolBatch.isPending || (progress?.isComplete && progress.totalEligible > 0)}
+        disabled={isDistributing || distributeGlobalPoolBatch.isPending || (progress?.isComplete && progress.totalEligible > 0)}
         className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {distributeGlobalPoolBatch.isPending ? (
+        {isDistributing || distributeGlobalPoolBatch.isPending ? (
           <>
             <i className="fas fa-spinner fa-spin mr-2"></i>
-            Processing Batch...
+            {useBackend && backendAvailable ? 'Distributing Pool...' : 'Processing Batch...'}
           </>
         ) : progress?.isComplete ? (
           <>
@@ -112,12 +184,12 @@ export function BatchDistribution() {
         ) : progress && progress.lastIndex > 0 ? (
           <>
             <i className="fas fa-arrow-right mr-2"></i>
-            Distribute Next Batch
+            {useBackend && backendAvailable ? 'Distribute Global Pool' : 'Distribute Next Batch'}
           </>
         ) : (
           <>
             <i className="fas fa-share-alt mr-2"></i>
-            Start Batch Distribution
+            {useBackend && backendAvailable ? 'Distribute Global Pool' : 'Start Batch Distribution'}
           </>
         )}
       </button>
@@ -126,7 +198,10 @@ export function BatchDistribution() {
       <div className="mt-4 bg-blue-500/10 border border-blue-400/20 rounded-lg p-3">
         <p className="text-sm text-blue-300">
           <i className="fas fa-info-circle mr-2"></i>
-          Batch distribution processes {progress?.batchSize || 0} users at a time. Click multiple times to distribute to all eligible users.
+          {useBackend && backendAvailable 
+            ? 'Backend distribution processes all eligible users in one transaction.'
+            : `Batch distribution processes ${progress?.batchSize || 0} users at a time. Click multiple times to distribute to all eligible users.`
+          }
         </p>
       </div>
 

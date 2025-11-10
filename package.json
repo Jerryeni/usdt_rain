@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "test:backend": "ts-node scripts/test-backend-integration.ts",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "backend:test": "cd backend && npm test"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.5",
