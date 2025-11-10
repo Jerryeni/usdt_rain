@@ -19,7 +19,6 @@ export interface AchieverRewardsData {
     meetsRequirement: boolean;
     isMarkedByAdmin: boolean;
     isRewarded: boolean;
-    needsAdminApproval: boolean;
     canClaim: boolean;
     rewardStatus: 'not-eligible' | 'pending-admin' | 'unclaimed' | 'claimed';
     description: string;
@@ -93,7 +92,6 @@ export function useAchieverRewards(userAddress?: string | null) {
             }
             
             let rewardStatus: 'not-eligible' | 'pending-admin' | 'unclaimed' | 'claimed';
-            let needsAdminApproval = false;
             let canClaim = false;
             let isMarkedByAdmin = isRewarded;
             
@@ -104,9 +102,8 @@ export function useAchieverRewards(userAddress?: string | null) {
               // Admin has marked and automatically rewarded the user
               rewardStatus = 'claimed';
             } else {
-              // User meets requirement but admin hasn't marked yet - contact admin
+              // User meets requirement but reward not yet distributed
               rewardStatus = 'pending-admin';
-              needsAdminApproval = true;
             }
             
             return {
@@ -116,7 +113,6 @@ export function useAchieverRewards(userAddress?: string | null) {
               meetsRequirement,
               isMarkedByAdmin,
               isRewarded,
-              needsAdminApproval,
               canClaim,
               rewardStatus,
               description,

@@ -14,7 +14,6 @@ export interface GlobalPoolData {
   totalClaimedUSD: string;
   eligibleUsersCount: number;
   eligibleUsers: string[];
-  needsAdminApproval: boolean;
   hasReceivedReward: boolean;
   // New fields from getGlobalPoolStats
   totalAllocated: bigint;
@@ -57,7 +56,6 @@ export function useGlobalPool(userAddress?: string | null) {
         let totalClaimed = BigInt(0);
         let eligibleUsersCount = 0;
         let eligibleUsers: string[] = [];
-        let needsAdminApproval = false;
         let hasReceivedReward = false;
         
         // New global pool stats
@@ -121,9 +119,6 @@ export function useGlobalPool(userAddress?: string | null) {
 
             // User is eligible if they are active AND in the eligible list
             userEligible = isActive && userInEligibleList;
-            
-            // User needs admin approval if they are active but NOT in the eligible list
-            needsAdminApproval = isActive && !userInEligibleList;
 
             if (userInEligibleList && eligibleUsersCount > 0) {
               // Calculate share based on eligible users count
@@ -185,7 +180,6 @@ export function useGlobalPool(userAddress?: string | null) {
           totalClaimedUSD: (Number(totalClaimed) / 1e18).toFixed(2),
           eligibleUsersCount,
           eligibleUsers,
-          needsAdminApproval,
           hasReceivedReward,
           // New fields
           totalAllocated,

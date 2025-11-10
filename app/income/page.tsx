@@ -605,25 +605,7 @@ export default function IncomeDetails() {
                   </div>
                 )}
 
-                {globalPool.needsAdminApproval && !globalPool.userInEligibleList && (
-                  <div className="space-y-3">
-                    <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
-                      <p className="text-sm text-blue-300 text-center mb-3">
-                        <i className="fas fa-info-circle mr-2"></i>
-                        You're eligible for global pool! Contact admin to get added to the distribution list.
-                      </p>
-                      <Link
-                        href="/help"
-                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center"
-                      >
-                        <i className="fas fa-headset mr-2"></i>
-                        Chat Admin for Approval
-                      </Link>
-                    </div>
-                  </div>
-                )}
-                
-                {!globalPool.userEligible && !globalPool.needsAdminApproval && (
+                {!globalPool.userEligible && (
                   <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
                     <p className="text-sm text-orange-300 text-center">
                       <i className="fas fa-info-circle mr-2"></i>
@@ -782,13 +764,13 @@ export default function IncomeDetails() {
                             Not Eligible
                           </button>
                         ) : levelDetail.rewardStatus === 'pending-admin' ? (
-                          <Link
-                            href="/help"
-                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center justify-center"
+                          <button
+                            disabled
+                            className="w-full bg-blue-500/20 text-blue-400 font-semibold py-2 px-4 rounded-lg cursor-default text-sm border border-blue-400/30"
                           >
-                            <i className="fas fa-headset mr-2"></i>
-                            Contact Admin for Approval
-                          </Link>
+                            <i className="fas fa-clock mr-2"></i>
+                            Pending Reward
+                          </button>
                         ) : (
                           <button
                             disabled
