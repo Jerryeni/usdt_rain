@@ -31,7 +31,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     // Initialize read-only RPC provider
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://data-seed-prebsc-1-s1.bnbchain.org:8545/';
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.mainnet.ucchain.org/';
     const rpcProvider = new ethers.JsonRpcProvider(rpcUrl);
     setProvider(rpcProvider);
 
@@ -145,7 +145,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsConnecting(false);
 
     // Reset to read-only RPC provider
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://data-seed-prebsc-1-s1.bnbchain.org:8545/';
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.mainnet.ucchain.org/';
     setProvider(new ethers.JsonRpcProvider(rpcUrl));
   };
 

@@ -139,11 +139,12 @@ import { useSidebar } from '@/lib/hooks/useSidebar';
 
 export default function IncomeDetails() {
   const [isClient, setIsClient] = useState(false);
+  const [isRequestingEligibility, setIsRequestingEligibility] = useState(false);
   const router = useRouter();
   const { address } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
   const { data: levelIncome, isLoading: loadingLevelIncome } = useLevelIncome(address);
-  const { data: globalPool, isLoading: loadingGlobalPool } = useGlobalPool(address);
+  const { data: globalPool, isLoading: loadingGlobalPool, refetch: refetchGlobalPool } = useGlobalPool(address);
   // const { data: achieverRewards, isLoading: loadingAchiever } = useAchieverRewards(address);
   // const { data: nonWorkingIncome, isLoading: loadingNonWorking } = useNonWorkingIncome(address);
   const withdrawLevel = useWithdrawLevel();
@@ -302,6 +303,34 @@ export default function IncomeDetails() {
   //     setTxStatus('failed');
   //   }
   // };
+
+  const handleRequestEligibility = async () => {
+    if (!address || isRequestingEligibility) return;
+
+    setIsRequestingEligibility(true);
+    try {
+      const response = await fetch('/api/request-eligibility', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('✅ Success! You have been added to the eligible list. Admin will distribute rewards soon.');
+        // Refetch global pool data
+        setTimeout(() => refetchGlobalPool(), 2000);
+      } else {
+        alert(`❌ ${data.error || 'Failed to request eligibility'}`);
+      }
+    } catch (error: any) {
+      console.error('Failed to request eligibility:', error);
+      alert('❌ Failed to request eligibility. Please try again.');
+    } finally {
+      setIsRequestingEligibility(false);
+    }
+  };
 
   const handleClaimGlobalPool = async () => {
     if (!globalPool || globalPool.userPending === BigInt(0)) {
@@ -605,11 +634,45 @@ export default function IncomeDetails() {
                   </div>
                 )}
 
-                {!globalPool.userEligible && (
+                {globalPool.canRequestEligibility && !globalPool.userInEligibleList && (
+                  <div className="space-y-3">
+                    <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4">
+                      <div className="text-center mb-3">
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <i className="fas fa-check-circle text-2xl text-green-400"></i>
+                        </div>
+                        <h3 className="text-green-400 font-semibold mb-1">You're Eligible!</h3>
+                        <p className="text-sm text-gray-300 mb-1">
+                          You have 10+ direct referrals. Request to be added to the eligible list.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleRequestEligibility}
+                        disabled={isRequestingEligibility}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isRequestingEligibility ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-paper-plane mr-2"></i>
+                            Activate
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!globalPool.userEligible && !globalPool.canRequestEligibility && (
                   <div className="bg-orange-500/10 border border-orange-400/20 rounded-xl p-3">
                     <p className="text-sm text-orange-300 text-center">
                       <i className="fas fa-info-circle mr-2"></i>
-                      Activate your account to become eligible for global pool rewards
+                      {!address ? 'Connect wallet to view eligibility' : 
+                       'Get 10+ direct referrals to become eligible for global pool rewards'}
                     </p>
                   </div>
                 )}

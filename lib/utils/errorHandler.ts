@@ -85,8 +85,8 @@ export function handleError(error: any): ErrorDetails {
   if (errorMessage.includes('network') || errorMessage.includes('chain')) {
     return {
       title: 'Wrong Network',
-      message: 'Please switch to BSC Testnet in your wallet.',
-      action: 'Switch to BSC Testnet',
+      message: 'Please switch to UBC Mainet in your wallet.',
+      action: 'Switch to UBC Mainet',
       retryable: true,
     };
   }

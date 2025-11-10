@@ -88,7 +88,7 @@ export function useAdminActions() {
           throw new Error('No eligible users to distribute to. Add eligible users first.');
         }
         if (error.message?.includes('transfer amount exceeds balance') || 
-            error.message?.includes('BEP40')) {
+            error.message?.includes('UBC20')) {
           throw new Error('Insufficient USDT balance in contract. Try using "Batch Distribute" instead, or add a small buffer of USDT to the contract.');
         }
         if (error.message?.includes('user rejected') || error.message?.includes('User denied')) {

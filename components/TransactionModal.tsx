@@ -160,7 +160,7 @@ export function TransactionModal({
                   rel="noopener noreferrer"
                   className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center justify-center gap-2 transition-colors"
                 >
-                  <span>View on BSCScan</span>
+                  <span>View on UBCScan</span>
                   <i className="fas fa-external-link-alt text-xs"></i>
                 </a>
               </div>

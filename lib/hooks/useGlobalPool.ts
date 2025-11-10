@@ -15,6 +15,8 @@ export interface GlobalPoolData {
   eligibleUsersCount: number;
   eligibleUsers: string[];
   hasReceivedReward: boolean;
+  canRequestEligibility: boolean;
+  isPendingApproval: boolean;
   // New fields from getGlobalPoolStats
   totalAllocated: bigint;
   totalAllocatedUSD: string;
@@ -57,6 +59,8 @@ export function useGlobalPool(userAddress?: string | null) {
         let eligibleUsersCount = 0;
         let eligibleUsers: string[] = [];
         let hasReceivedReward = false;
+        let canRequestEligibility = false;
+        let isPendingApproval = false;
         
         // New global pool stats
         let totalAllocated = BigInt(0);
@@ -119,6 +123,13 @@ export function useGlobalPool(userAddress?: string | null) {
 
             // User is eligible if they are active AND in the eligible list
             userEligible = isActive && userInEligibleList;
+            
+            // Check if user can request eligibility (10+ referrals, active, not in list)
+            const directReferrals = Number(userInfo[2] || 0);
+            canRequestEligibility = isActive && !userInEligibleList && directReferrals >= 10;
+            
+            // If user has 10+ referrals but not in list, they're pending approval
+            isPendingApproval = isActive && !userInEligibleList && directReferrals >= 10;
 
             if (userInEligibleList && eligibleUsersCount > 0) {
               // Calculate share based on eligible users count
@@ -181,6 +192,8 @@ export function useGlobalPool(userAddress?: string | null) {
           eligibleUsersCount,
           eligibleUsers,
           hasReceivedReward,
+          canRequestEligibility,
+          isPendingApproval,
           // New fields
           totalAllocated,
           totalAllocatedUSD: (Number(totalAllocated) / 1e18).toFixed(2),

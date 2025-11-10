@@ -303,7 +303,7 @@ export default function TransactionsPage() {
                             rel="noopener noreferrer"
                             className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1 transition-colors"
                           >
-                            <span>View on BSCScan</span>
+                            <span>View on UCScan</span>
                             <i className="fas fa-external-link-alt"></i>
                           </a>
                         )}

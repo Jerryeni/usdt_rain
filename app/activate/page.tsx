@@ -55,7 +55,7 @@ export default function ActivatePage() {
       // This prevents ENS resolution attempts on non-ENS networks
       try {
         const network = await signer.provider?.getNetwork();
-        if (network && (network.chainId === BigInt(97) || network.chainId === BigInt(56))) {
+        if (network && (network.chainId === BigInt(1137) || network.chainId === BigInt(1137))) {
           // BSC network - ENS not supported, but ethers might still try
           // We'll proceed but catch any ENS-related errors
         }

@@ -516,7 +516,7 @@ function RegisterPageContent() {
                 </div>
                 <div>
                   <div className="text-white font-medium">Smart Contract Security</div>
-                  <div className="text-gray-400">Transparent and secure on BSC</div>
+                  <div className="text-gray-400">Transparent and secure on UBC</div>
                 </div>
               </div>
 

@@ -213,7 +213,7 @@ export function parseError(error: unknown): ParsedError {
     };
   }
   
-  if (errorString.includes('transfer amount exceeds balance') || errorString.includes('bep40')) {
+  if (errorString.includes('transfer amount exceeds balance') || errorString.includes('ubc20')) {
     return {
       title: 'Insufficient Balance',
       message: 'The contract doesn\'t have enough USDT to complete this distribution.',

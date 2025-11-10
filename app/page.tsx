@@ -88,20 +88,7 @@ export default function Dashboard() {
   };
 
   // Manual network switch handler
-  const handleManualNetworkSwitch = async () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x61' }], // BSC Testnet
-        });
-        console.log("Network Switched: Successfully switched to BSC Testnet");
-      } catch (error: unknown) {
-        console.error('Manual network switch failed:', error);
-        console.error("Network Switch Failed: Please switch to BSC Testnet manually in your wallet");
-      }
-    }
-  };
+  
 
   // Set up contract event listeners for real-time updates
   useContractEvents(address);
