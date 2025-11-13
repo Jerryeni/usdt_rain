@@ -2,7 +2,7 @@
  * Test script to verify the eligibility request flow
  */
 
-const BACKEND_URL = 'https://usdtrains.onrender.com/api/v1';
+const BACKEND_URL = 'https://usdtrain-production.up.railway.app/api/v1';
 
 async function testEligibilityFlow() {
   console.log('🧪 Testing Eligibility Request Flow\n');

@@ -5,7 +5,7 @@
 
 import { ethers } from 'ethers';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://usdtrains.onrender.com';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://usdtrain-production.up.railway.app';
 const API_PREFIX = '/api/v1';
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.mainnet.ucchain.org/';
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_USDTRAIN_CONTRACT_ADDRESS || '0x9b7f2CF537F81f2fCfd3252B993b7B12a47648d1';
