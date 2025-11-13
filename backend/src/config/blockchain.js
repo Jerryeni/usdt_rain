@@ -1,24 +1,23 @@
 import { ethers } from 'ethers';
 import { config } from './env.js';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Simplified ABI - Only the functions we need (without parameter names for compatibility)
+const CONTRACT_ABI = [
+  "function addEligibleUser(address) external",
+  "function removeEligibleUser(address) external",
+  "function getUserInfo(address) view returns (uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,uint256,string,string)",
+  "function getEligibleUsers() view returns (address[])",
+  "function eligibleUserCount() view returns (uint256)",
+  "function getUserAddressById(uint256) view returns (address)",
+  "function totalUsers() view returns (uint256)",
+  "function manager() view returns (address)",
+  "function getGlobalPoolStats() view returns (uint256,uint256,uint256,uint256)",
+  "function globalPoolBalance() view returns (uint256)",
+  "function getContractStats() view returns (uint256,uint256,uint256,uint256)",
+  "function distributeGlobalPoolVirtual() external"
+];
 
-// Load contract ABI from the main project
-const abiPath = join(__dirname, '../../../lib/contracts/abi/USDTRain.json');
-let CONTRACT_ABI;
-
-try {
-  CONTRACT_ABI = JSON.parse(readFileSync(abiPath, 'utf8'));
-  console.log('✅ Contract ABI loaded successfully');
-} catch (error) {
-  console.error('❌ Failed to load contract ABI:', error.message);
-  console.error('   Make sure the ABI file exists at:', abiPath);
-  process.exit(1);
-}
+console.log('✅ Contract ABI loaded successfully');
 
 // UCChain Provider Configuration
 export const provider = new ethers.JsonRpcProvider(config.rpcUrl, {
