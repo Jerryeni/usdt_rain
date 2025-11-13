@@ -332,7 +332,7 @@ export default function Dashboard() {
               </div>
             </div>
             <h2 className="text-base sm:text-lg text-gray-300 mb-2">Total Earnings</h2>
-            <div className="text-3xl sm:text-4xl font-bold gradient-text orbitron counter-animation" id="total-earnings">
+            <div className="text-2xl sm:text-3xl font-bold gradient-text orbitron counter-animation break-words px-2 overflow-hidden" id="total-earnings">
               {loadingUserInfo ? 'Loading...' : userInfo?.totalEarned ?
                 `$${(Number(userInfo.totalEarned) / 1e18).toFixed(2)}` :
                 '$0.00'

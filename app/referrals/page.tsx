@@ -125,13 +125,13 @@ export default function Referrals() {
             <>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold gradient-text orbitron counter-animation">
+                  <div className="text-2xl sm:text-3xl font-bold gradient-text orbitron counter-animation">
                     {referralData?.direct.count || 0}
                   </div>
                   <p className="text-gray-400 text-sm">Total Referrals</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold gradient-text orbitron counter-animation">
+                  <div className="text-2xl sm:text-3xl font-bold gradient-text orbitron counter-animation">
                     {referralData?.teamStats.activeMembers || 0}
                   </div>
                   <p className="text-gray-400 text-sm">Active Members</p>

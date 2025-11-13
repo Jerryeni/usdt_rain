@@ -78,13 +78,19 @@ class BackendApiService {
     //   headers['X-API-Key'] = this.apiKey;
     // }
 
+    const url = `${this.baseUrl}${endpoint}`;
+    console.log(`[Backend API] Request to: ${url}`, options.method || 'GET');
+
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(url, {
         ...options,
         headers,
       });
 
+      console.log(`[Backend API] Response status: ${response.status}`);
+
       const data = await response.json();
+      console.log(`[Backend API] Response data:`, data);
 
       if (!response.ok) {
         throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
@@ -92,7 +98,7 @@ class BackendApiService {
 
       return data;
     } catch (error: any) {
-      console.error(`Backend API Error [${endpoint}]:`, error);
+      console.error(`[Backend API] Error [${endpoint}]:`, error);
       return {
         success: false,
         error: error.message || 'Failed to connect to backend server',
@@ -227,6 +233,49 @@ class BackendApiService {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Get recent request logs
+   */
+  async getRecentLogs(limit: number = 50): Promise<ApiResponse<{
+    requests: any[];
+    count: number;
+  }>> {
+    return this.request(`/logs/recent?limit=${limit}`);
+  }
+
+  /**
+   * Get failed request logs
+   */
+  async getFailedLogs(limit: number = 50): Promise<ApiResponse<{
+    requests: any[];
+    count: number;
+  }>> {
+    return this.request(`/logs/failed?limit=${limit}`);
+  }
+
+  /**
+   * Get request statistics
+   */
+  async getLogStats(): Promise<ApiResponse<{
+    total: number;
+    successful: number;
+    failed: number;
+    averageDuration: number;
+    endpoints: Record<string, { count: number; failed: number }>;
+  }>> {
+    return this.request('/logs/stats');
+  }
+
+  /**
+   * Get log by request ID
+   */
+  async getLogById(requestId: string): Promise<ApiResponse<{
+    request: any;
+    response: any;
+  }>> {
+    return this.request(`/logs/${requestId}`);
   }
 }
 

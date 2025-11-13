@@ -213,20 +213,20 @@ export default function SharePage() {
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-400 orbitron">
+              <div className="text-center overflow-hidden">
+                <div className="text-xl sm:text-2xl font-bold text-cyan-400 orbitron">
                   {referralData?.direct.count || 0}
                 </div>
                 <p className="text-gray-400 text-xs">Total Referrals</p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 orbitron">
+              <div className="text-center overflow-hidden">
+                <div className="text-xl sm:text-2xl font-bold text-green-400 orbitron break-words px-1">
                   ${(referralEarnings / 1e18).toFixed(0)}
                 </div>
                 <p className="text-gray-400 text-xs">Earned</p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400 orbitron">
+              <div className="text-center overflow-hidden">
+                <div className="text-xl sm:text-2xl font-bold text-purple-400 orbitron">
                   {referralData?.teamStats.activeMembers || 0}
                 </div>
                 <p className="text-gray-400 text-xs">Active</p>

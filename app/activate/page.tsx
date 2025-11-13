@@ -218,7 +218,7 @@ export default function ActivatePage() {
                 <div className="glass-card rounded-xl p-4 mb-4">
                   <div className="text-center">
                     <div className="text-sm text-gray-400 mb-1">Current USDT Balance</div>
-                    <div className="text-2xl font-bold gradient-text orbitron">
+                    <div className="text-xl sm:text-2xl font-bold gradient-text orbitron break-words px-2">
                       {loading ? 'Loading...' : usdtBalance !== null ? `$${usdtBalance.toFixed(2)}` : 'N/A'}
                     </div>
                   </div>
@@ -227,7 +227,7 @@ export default function ActivatePage() {
                 <div className="glass-card rounded-xl p-4">
                   <div className="text-center">
                     <div className="text-sm text-gray-400 mb-1">Required for Activation</div>
-                    <div className="text-2xl font-bold text-cyan-400 orbitron">$25.00 USDT</div>
+                    <div className="text-xl sm:text-2xl font-bold text-cyan-400 orbitron">$25.00 USDT</div>
                   </div>
                 </div>
               </div>

@@ -308,6 +308,8 @@ export default function IncomeDetails() {
     if (!address || isRequestingEligibility) return;
 
     setIsRequestingEligibility(true);
+    console.log('[Income Page] Requesting eligibility for:', address);
+    
     try {
       const response = await fetch('/api/request-eligibility', {
         method: 'POST',
@@ -315,18 +317,22 @@ export default function IncomeDetails() {
         body: JSON.stringify({ address })
       });
 
+      console.log('[Income Page] Response status:', response.status);
       const data = await response.json();
+      console.log('[Income Page] Response data:', data);
 
       if (data.success) {
         alert('✅ Success! You have been added to the eligible list. Admin will distribute rewards soon.');
         // Refetch global pool data
         setTimeout(() => refetchGlobalPool(), 2000);
       } else {
-        alert(`❌ ${data.error || 'Failed to request eligibility'}`);
+        const errorMsg = data.error || 'Failed to request eligibility';
+        console.error('[Income Page] Request failed:', errorMsg);
+        alert(`❌ ${errorMsg}`);
       }
     } catch (error: any) {
-      console.error('Failed to request eligibility:', error);
-      alert('❌ Failed to request eligibility. Please try again.');
+      console.error('[Income Page] Exception:', error);
+      alert(`❌ Failed to request eligibility: ${error.message || 'Please try again.'}`);
     } finally {
       setIsRequestingEligibility(false);
     }
@@ -455,26 +461,26 @@ export default function IncomeDetails() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-6 text-center">
-                  <div className="text-sm text-gray-400 mb-2">
-                    <i className="fas fa-coins mr-2"></i>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-4 text-center overflow-autoß">
+                  <div className="text-xs text-gray-400 mb-2">
+                    <i className="fas fa-coins mr-1"></i>
                     Total Earned
                   </div>
-                  <div className="text-3xl font-bold text-white counter-animation orbitron">
+                  <div className="text-lg sm:text-xl font-bold text-white counter-animation orbitron break-words px-1 ">
                     {formatUsd(userInfo?.totalEarned)}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">All time earnings</div>
+                  <div className="text-xs text-gray-400 mt-1">All time earnings</div>
                 </div>
-                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-xl p-6 text-center">
-                  <div className="text-sm text-gray-400 mb-2">
-                    <i className="fas fa-check-circle mr-2"></i>
+                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-xl p-4 text-center overflow-hidden">
+                  <div className="text-xs text-gray-400 mb-2">
+                    <i className="fas fa-check-circle mr-1"></i>
                     Total Claimed
                   </div>
-                  <div className="text-3xl font-bold text-green-400 counter-animation orbitron">
+                  <div className="text-lg sm:text-xl font-bold text-green-400 counter-animation orbitron break-words px-1">
                     {formatUsd(userInfo?.totalWithdrawn)}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">Successfully withdrawn</div>
+                  <div className="text-xs text-gray-400 mt-1">Successfully withdrawn</div>
                 </div>
               </div>
             </>
@@ -551,15 +557,15 @@ export default function IncomeDetails() {
               <>
                 {/* Global Pool Stats */}
                 <div className="grid grid-cols-1 gap-3 mb-4">
-                  {/* <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-3 text-center">
+                  {/* <div className="bg-purple-500/10 border border-purple-400/20 rounded-xl p-3 text-center overflow-hidden">
                     <div className="text-xs text-gray-400 mb-1">Total Allocated</div>
-                    <div className="text-lg font-bold text-purple-400 orbitron">
+                    <div className="text-base font-bold text-purple-400 orbitron break-words px-1">
                       ${globalPool.totalAllocatedUSD}
                     </div>
                   </div> */}
-                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-3 text-center">
+                  <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-3 text-center overflow-hidden">
                     <div className="text-xs text-gray-400 mb-1">Total Pool</div>
-                    <div className="text-lg font-bold text-green-400 orbitron">
+                    <div className="text-base sm:text-lg font-bold text-green-400 orbitron break-words px-1">
                       ${globalPool.balanceUSD}
                     </div>
                   </div>
@@ -567,15 +573,15 @@ export default function IncomeDetails() {
 
                 {/* User Stats */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-3 text-center">
+                  <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-3 text-center overflow-hidden">
                     <div className="text-xs text-gray-400 mb-1">Available to Claim</div>
-                    <div className="text-lg font-bold text-cyan-400 orbitron">
+                    <div className="text-base sm:text-lg font-bold text-cyan-400 orbitron break-words px-1">
                       ${globalPool.userPendingUSD}
                     </div>
                   </div>
-                  <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-3 text-center">
+                  <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-3 text-center overflow-hidden">
                     <div className="text-xs text-gray-400 mb-1">My Total Claimed</div>
-                    <div className="text-lg font-bold text-blue-400 orbitron">
+                    <div className="text-base sm:text-lg font-bold text-blue-400 orbitron break-words px-1">
                       ${globalPool.userClaimedUSD}
                     </div>
                   </div>

@@ -49,6 +49,12 @@ export const logger = winston.createLogger({
       filename: join(logsDir, 'combined.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5
+    }),
+    // Dedicated request/response log
+    new winston.transports.File({
+      filename: join(logsDir, 'requests.log'),
+      maxsize: 10485760, // 10MB
+      maxFiles: 10
     })
   ]
 });
@@ -60,27 +66,106 @@ if (config.nodeEnv !== 'production') {
   }));
 }
 
-// Request logging middleware
+// Request logging middleware with detailed request/response tracking
 export const requestLogger = (req, res, next) => {
   const start = Date.now();
+  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   
-  logger.info('📥 Incoming request', {
+  // Attach request ID to request object
+  req.requestId = requestId;
+  
+  // Log incoming request with full details
+  const requestLog = {
+    requestId,
+    timestamp: new Date().toISOString(),
+    type: 'REQUEST',
     method: req.method,
     url: req.url,
-    ip: req.ip
-  });
+    path: req.path,
+    query: req.query,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'user-agent': req.headers['user-agent'],
+      'x-api-key': req.headers['x-api-key'] ? '***' : undefined,
+      'origin': req.headers['origin']
+    },
+    body: req.body && Object.keys(req.body).length > 0 ? sanitizeBody(req.body) : undefined,
+    ip: req.ip,
+    userAgent: req.headers['user-agent']
+  };
+  
+  logger.info('📥 Incoming request', requestLog);
+  
+  // Capture response
+  const originalSend = res.send;
+  const originalJson = res.json;
+  let responseBody;
+  
+  // Override res.json to capture response
+  res.json = function(data) {
+    responseBody = data;
+    return originalJson.call(this, data);
+  };
+  
+  // Override res.send to capture response
+  res.send = function(data) {
+    if (!responseBody) {
+      responseBody = data;
+    }
+    return originalSend.call(this, data);
+  };
   
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logLevel = res.statusCode >= 400 ? 'warn' : 'info';
     
-    logger.log(logLevel, '📤 Request completed', {
+    // Log response with full details
+    const responseLog = {
+      requestId,
+      timestamp: new Date().toISOString(),
+      type: 'RESPONSE',
       method: req.method,
       url: req.url,
+      path: req.path,
       statusCode: res.statusCode,
-      duration: `${duration}ms`
-    });
+      statusMessage: res.statusMessage,
+      duration: `${duration}ms`,
+      durationMs: duration,
+      body: responseBody ? sanitizeBody(responseBody) : undefined,
+      headers: {
+        'content-type': res.getHeader('content-type')
+      }
+    };
+    
+    logger.log(logLevel, '📤 Request completed', responseLog);
+    
+    // Log summary for console
+    const emoji = res.statusCode >= 400 ? '❌' : '✅';
+    console.log(`${emoji} ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
   });
   
   next();
 };
+
+// Sanitize sensitive data from logs
+function sanitizeBody(body) {
+  if (typeof body !== 'object' || body === null) {
+    return body;
+  }
+  
+  const sanitized = { ...body };
+  const sensitiveFields = ['privateKey', 'password', 'secret', 'token', 'apiKey'];
+  
+  for (const field of sensitiveFields) {
+    if (sanitized[field]) {
+      sanitized[field] = '***REDACTED***';
+    }
+  }
+  
+  // Truncate long addresses for readability
+  if (sanitized.address && typeof sanitized.address === 'string') {
+    sanitized.address = sanitized.address;
+  }
+  
+  return sanitized;
+}

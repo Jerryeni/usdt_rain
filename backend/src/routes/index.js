@@ -14,6 +14,13 @@ import {
   systemStatus, 
   getContractStats 
 } from '../controllers/systemController.js';
+import {
+  getRecentLogs,
+  getFailedLogs,
+  getLogById,
+  getLogsByEndpoint,
+  getLogStats
+} from '../controllers/logsController.js';
 import { requireApiKey } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -34,5 +41,12 @@ router.post('/eligible-users/remove', requireApiKey, removeEligibleUser);
 // Global Pool routes
 router.get('/global-pool/stats', requireApiKey, getGlobalPoolStats);
 router.post('/global-pool/distribute', requireApiKey, distributeGlobalPool);
+
+// Logs routes (admin only)
+router.get('/logs/recent', requireApiKey, getRecentLogs);
+router.get('/logs/failed', requireApiKey, getFailedLogs);
+router.get('/logs/stats', requireApiKey, getLogStats);
+router.get('/logs/:requestId', requireApiKey, getLogById);
+router.get('/logs/endpoint/:endpoint', requireApiKey, getLogsByEndpoint);
 
 export default router;
