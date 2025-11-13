@@ -3,7 +3,7 @@
  * Handles all communication with the USDT Rain backend server
  */
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://usdtrain.senbags.co';
 const API_PREFIX = '/api/v1';
 const API_KEY = process.env.NEXT_PUBLIC_BACKEND_API_KEY;
 

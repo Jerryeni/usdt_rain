@@ -1,0 +1,122 @@
+USDT RAIN BACKEND - cPanel VPS Deployment Checklist
+===================================================
+
+PRE-DEPLOYMENT
+--------------
+[ ] Node.js 18+ installed on server
+[ ] PM2 installed globally
+[ ] Manager wallet private key ready
+[ ] Manager wallet has UCH for gas fees
+[ ] Domain/subdomain configured (e.g., api.yourdomain.com)
+[ ] SSL certificate ready or AutoSSL enabled
+
+SERVER SETUP
+------------
+[ ] SSH access to server working
+[ ] Created directory: /home/username/usdtrain-backend/
+[ ] Uploaded all backend files
+[ ] Installed dependencies: npm install --production
+[ ] Created .env file from .env.example
+[ ] Configured all .env variables:
+    [ ] MANAGER_PRIVATE_KEY
+    [ ] CONTRACT_ADDRESS
+    [ ] CORS_ORIGIN
+    [ ] API_KEY (generated with: openssl rand -hex 32)
+[ ] Set .env permissions: chmod 600 .env
+[ ] Tested connection: npm test
+
+PM2 CONFIGURATION
+-----------------
+[ ] Started with PM2: pm2 start src/server.js --name usdtrain-backend
+[ ] Saved PM2 list: pm2 save
+[ ] Configured auto-start: pm2 startup
+[ ] Verified status: pm2 status
+[ ] Checked logs: pm2 logs usdtrain-backend
+
+REVERSE PROXY
+-------------
+[ ] Configured reverse proxy in cPanel
+[ ] Tested proxy: curl http://localhost:3001/api/v1/health
+[ ] SSL certificate installed
+[ ] HTTPS working: curl https://api.yourdomain.com/api/v1/health
+
+FIREWALL
+--------
+[ ] Port 3001 allowed in firewall
+[ ] Tested external access
+
+FRONTEND INTEGRATION
+--------------------
+[ ] Updated frontend .env.production:
+    [ ] NEXT_PUBLIC_BACKEND_URL=https://api.yourdomain.com
+    [ ] NEXT_PUBLIC_BACKEND_API_KEY=your-api-key
+[ ] Rebuilt frontend: npm run build
+[ ] Deployed frontend
+[ ] Tested frontend-backend connection
+
+SECURITY
+--------
+[ ] .env file secured (chmod 600)
+[ ] Strong API key generated
+[ ] CORS configured for frontend domain only
+[ ] SSL certificate valid
+[ ] Manager private key backed up securely
+[ ] Firewall rules configured
+
+MONITORING
+----------
+[ ] PM2 monitoring working: pm2 monit
+[ ] Logs accessible: tail -f logs/combined.log
+[ ] Health endpoint responding
+[ ] Backup script created and scheduled
+
+TESTING
+-------
+[ ] Health check: curl https://api.yourdomain.com/api/v1/health
+[ ] Status check: curl https://api.yourdomain.com/api/v1/status
+[ ] Stats check: curl https://api.yourdomain.com/api/v1/stats
+[ ] Frontend can connect to backend
+[ ] Admin can add eligible users
+[ ] Users can request eligibility
+
+POST-DEPLOYMENT
+---------------
+[ ] Documented server details
+[ ] Saved backup of .env file (encrypted)
+[ ] Configured monitoring/alerting
+[ ] Tested disaster recovery procedure
+[ ] Updated team with API endpoint
+[ ] Monitored logs for first 24 hours
+
+MAINTENANCE SCHEDULE
+--------------------
+[ ] Daily: Check PM2 status and logs
+[ ] Weekly: Review error logs
+[ ] Monthly: Update dependencies, rotate API keys
+[ ] Quarterly: Security audit, backup verification
+
+EMERGENCY CONTACTS
+------------------
+Server Admin: _______________
+DevOps: _______________
+Contract Owner: _______________
+
+IMPORTANT COMMANDS
+------------------
+Start:    pm2 start src/server.js --name usdtrain-backend
+Stop:     pm2 stop usdtrain-backend
+Restart:  pm2 restart usdtrain-backend
+Logs:     pm2 logs usdtrain-backend
+Status:   pm2 status
+Test:     npm test
+Health:   curl http://localhost:3001/api/v1/health
+
+DEPLOYMENT DATE: _______________
+DEPLOYED BY: _______________
+SERVER IP: _______________
+DOMAIN: _______________
+
+NOTES:
+_____________________________________________________
+_____________________________________________________
+_____________________________________________________

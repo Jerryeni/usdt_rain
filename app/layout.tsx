@@ -30,7 +30,7 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "USDT RAIN - Cryptocurrency Referral Platform",
+  title: "USDT Rain - Universe Blockchain Community Program",
   description: "Multi-level cryptocurrency referral platform with global pool rewards",
 };
 
