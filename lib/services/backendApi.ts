@@ -88,6 +88,15 @@ class BackendApiService {
       });
 
       console.log(`[Backend API] Response status: ${response.status}`);
+      console.log(`[Backend API] Response content-type: ${response.headers.get('content-type')}`);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error(`[Backend API] Non-JSON response:`, text.substring(0, 200));
+        throw new Error(`Backend returned non-JSON response (${response.status})`);
+      }
 
       const data = await response.json();
       console.log(`[Backend API] Response data:`, data);

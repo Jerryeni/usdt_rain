@@ -318,6 +318,16 @@ export default function IncomeDetails() {
       });
 
       console.log('[Income Page] Response status:', response.status);
+      console.log('[Income Page] Response content-type:', response.headers.get('content-type'));
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('[Income Page] Non-JSON response:', text.substring(0, 200));
+        throw new Error('Server returned an invalid response. Please try again later.');
+      }
+
       const data = await response.json();
       console.log('[Income Page] Response data:', data);
 
