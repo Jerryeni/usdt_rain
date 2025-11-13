@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: usdtrain-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: RPC_URL
+        value: https://rpc.mainnet.ucchain.org
+      - key: CHAIN_ID
+        value: 1137
+      - key: NETWORK_NAME
+        value: ucchain-mainnet
+      - key: CONTRACT_ADDRESS
+        value: 0x9b7f2CF537F81f2fCfd3252B993b7B12a47648d1
+      - key: USDT_CONTRACT_ADDRESS
+        value: 0x45643aB553621e611984Ff34633adf8E18dA2d55
+      - key: API_PREFIX
+        value: /api/v1
+      - key: MIN_REFERRALS_FOR_ELIGIBILITY
+        value: 10
+      - key: LOG_LEVEL
+        value: info
+      - key: MANAGER_PRIVATE_KEY
+        sync: false
+      - key: API_KEY
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
