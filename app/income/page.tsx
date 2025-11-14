@@ -140,6 +140,7 @@ import { useSidebar } from '@/lib/hooks/useSidebar';
 export default function IncomeDetails() {
   const [isClient, setIsClient] = useState(false);
   const [isRequestingEligibility, setIsRequestingEligibility] = useState(false);
+  const [hasRequestedEligibility, setHasRequestedEligibility] = useState(false);
   const router = useRouter();
   const { address } = useWallet();
   const { data: userInfo, isLoading: loadingUserInfo } = useUserInfo(address);
@@ -161,6 +162,15 @@ export default function IncomeDetails() {
 
   // Set up event listeners for real-time updates
   useContractEvents(address);
+
+  // Check localStorage for activation status
+  useEffect(() => {
+    if (address) {
+      const storageKey = `eligibility_requested_${address.toLowerCase()}`;
+      const hasRequested = localStorage.getItem(storageKey) === 'true';
+      setHasRequestedEligibility(hasRequested);
+    }
+  }, [address]);
 
   useEffect(() => {
     setIsClient(true);
@@ -310,8 +320,12 @@ export default function IncomeDetails() {
     setIsRequestingEligibility(true);
     console.log('[Income Page] Requesting eligibility for:', address);
     
+    const BACKEND_URL = 'https://usdtrain-production.up.railway.app';
+    const API_PREFIX = '/api/v1';
+    
     try {
-      const response = await fetch('/api/request-eligibility', {
+      // Call backend API directly
+      const response = await fetch(`${BACKEND_URL}${API_PREFIX}/eligible-users/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address })
@@ -332,6 +346,11 @@ export default function IncomeDetails() {
       console.log('[Income Page] Response data:', data);
 
       if (data.success) {
+        // Save activation status to localStorage
+        const storageKey = `eligibility_requested_${address.toLowerCase()}`;
+        localStorage.setItem(storageKey, 'true');
+        setHasRequestedEligibility(true);
+        
         alert('✅ Success! You have been added to the eligible list. Admin will distribute rewards soon.');
         // Refetch global pool data
         setTimeout(() => refetchGlobalPool(), 2000);
@@ -650,7 +669,7 @@ export default function IncomeDetails() {
                   </div>
                 )}
 
-                {globalPool.canRequestEligibility && !globalPool.userInEligibleList && (
+                {globalPool.canRequestEligibility && !globalPool.userInEligibleList && !hasRequestedEligibility && (
                   <div className="space-y-3">
                     <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4">
                       <div className="text-center mb-3">
@@ -679,6 +698,23 @@ export default function IncomeDetails() {
                           </>
                         )}
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {hasRequestedEligibility && !globalPool.userInEligibleList && (
+                  <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
+                    <div className="text-center">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <i className="fas fa-clock text-2xl text-blue-400"></i>
+                      </div>
+                      <h3 className="text-blue-400 font-semibold mb-1">Activation Pending</h3>
+                      <p className="text-sm text-gray-300">
+                        Your request has been submitted. Waiting for admin approval and reward distribution.
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        You'll be able to claim rewards once the admin distributes the global pool.
+                      </p>
                     </div>
                   </div>
                 )}
