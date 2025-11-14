@@ -1,10 +1,10 @@
 import { ethers } from 'ethers';
 import { config } from './env.js';
 
-// Simplified ABI - Only the functions we need (without parameter names for compatibility)
+// ✅ CORRECT ABI: NO PARAMETER NAME (exactly matching user's working code)
 const CONTRACT_ABI = [
   "function addEligibleUser(address) external",
-  "function removeEligibleUser(address) external",
+  "function removeEligibleUser(address) external", 
   "function getUserInfo(address) view returns (uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,uint256,string,string)",
   "function getEligibleUsers() view returns (address[])",
   "function eligibleUserCount() view returns (uint256)",
@@ -19,21 +19,24 @@ const CONTRACT_ABI = [
 
 console.log('✅ Contract ABI loaded successfully');
 
-// UCChain Provider Configuration
-export const provider = new ethers.JsonRpcProvider(config.rpcUrl, {
-  chainId: config.chainId,
-  name: config.networkName
+// ✅ UCChain Provider Configuration (exactly matching user's working code)
+export const provider = new ethers.JsonRpcProvider(config.rpcUrl, { 
+  chainId: config.chainId, 
+  name: config.networkName 
 });
 
-// Manager Wallet
+// ✅ Manager Wallet
 export const managerWallet = new ethers.Wallet(config.managerPrivateKey, provider);
 
-// Contract Instance
+// ✅ Contract Instance
 export const contract = new ethers.Contract(
   config.contractAddress,
   CONTRACT_ABI,
   managerWallet
 );
+
+// ✅ Exported for direct use (matching user's approach)
+export { ethers };
 
 // Utility function to check if address is valid
 export const isValidAddress = (address) => {
