@@ -68,8 +68,8 @@ const startServer = async () => {
     
     console.log('\n✅ Blockchain connection successful!\n');
     
-    // Start Express server
-    app.listen(config.port, () => {
+    // Start Express server - Listen on all interfaces (0.0.0.0) to allow external access
+    app.listen(config.port, '0.0.0.0', () => {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('🚀 USDT Rain Backend Server');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

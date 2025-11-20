@@ -320,7 +320,7 @@ export default function IncomeDetails() {
     setIsRequestingEligibility(true);
     console.log('[Income Page] Requesting eligibility for:', address);
     
-    const BACKEND_URL = 'https://usdtrain-production.up.railway.app';
+    const BACKEND_URL = 'http://147.93.110.96:3001';
     const API_PREFIX = '/api/v1';
     
     try {
